@@ -7,7 +7,7 @@ import * as argon2 from 'argon2';
 import { User } from '@/entities/user.entity';
 
 export interface TokenPayload {
-  sub: number;
+  sub: string;
   email: string;
   name: string;
 }
@@ -48,7 +48,7 @@ export class AuthService {
 
   async signTokens(user: User): Promise<Tokens> {
     const payload: TokenPayload = {
-      sub: user.id,
+      sub: user.id.toString(),
       email: user.email,
       name: user.name,
     };
@@ -56,11 +56,11 @@ export class AuthService {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
         secret: this.configService.getOrThrow<string>('JWT_ACCESS_SECRET'),
-        expiresIn: this.configService.get<string>('JWT_ACCESS_EXPIRES_IN', '15m'),
+        expiresIn: this.configService.get<string>('JWT_ACCESS_EXPIRES_IN', '15m') as any,
       }),
       this.jwtService.signAsync(payload, {
         secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
-        expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN', '7d'),
+        expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN', '7d') as any,
       }),
     ]);
 
@@ -77,7 +77,7 @@ export class AuthService {
         secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
       });
 
-      const user = await this.userRepo.findOne({ where: { id: payload.sub } });
+      const user = await this.userRepo.findOne({ where: { id: parseInt(payload.sub) } });
 
       if (!user || !user.refreshToken) {
         throw new UnauthorizedException('Invalid refresh token');
