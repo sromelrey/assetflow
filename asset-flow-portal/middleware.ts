@@ -16,10 +16,11 @@ const roleDefaultRoutes: Record<string, string> = {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
-  // Check for the session cookie from NestJS (connect.sid) AND our user_role cookie
-  const hasSession = request.cookies.has('connect.sid');
-  const hasRole = request.cookies.has('user_role');
-  const isAuthenticated = hasSession && hasRole;
+  // Check for the accessToken cookie
+  const hasAccessToken = request.cookies.has('accessToken');
+  const isAuthenticated = hasAccessToken;
+  // We can decode the token or check user_role cookie if we want role-based redirect later
+  // For now, assume if authenticated, they are generic user/admin
   const userRole = request.cookies.get('user_role')?.value || 'ADMIN';
 
   // Temporary debug logging
