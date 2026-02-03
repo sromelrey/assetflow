@@ -2,6 +2,7 @@ import { Entity, Column, ManyToOne, OneToMany, JoinColumn, Index } from 'typeorm
 import { CommonEntity } from './common.entity';
 import { Floor } from './floor.entity';
 import { Unit } from './unit.entity';
+import { Department } from './department.entity';
 
 @Entity({ name: 'division' })
 export class Division extends CommonEntity {
@@ -18,6 +19,6 @@ export class Division extends CommonEntity {
   @Index()
   floor: Floor;
 
-  @OneToMany(() => Unit, (unit) => unit.division)
-  units: Unit[];
+  @OneToMany(() => Department, (department) => department.divisionId)
+  departments: Department[];
 }

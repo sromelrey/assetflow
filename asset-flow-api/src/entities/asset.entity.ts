@@ -1,9 +1,10 @@
-import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, Index, OneToOne } from 'typeorm';
 import { CommonEntity } from './common.entity';
 import { Unit } from './unit.entity';
 import { AssetStatus } from '@/types/enums';
 import { Category } from './category.entity';
 import { Employee } from './employee.entity';
+import { AssetDetails } from './asset-details.entity';
 
 @Entity({ name: 'asset' })
 export class Asset extends CommonEntity {
@@ -13,7 +14,7 @@ export class Asset extends CommonEntity {
 
   @Column({ type: 'varchar', length: 100, nullable: true, unique: true })
   @Index({ unique: true })
-  serialNumber?: string;
+  serialNo?: string;
 
   @Column({type:'varchar', length: 100, unique: true})
   @Index()
@@ -41,7 +42,10 @@ export class Asset extends CommonEntity {
   @Index()
   category: Category;
 
-    // Link to Employee who created the asset
+  @OneToOne(() => AssetDetails, (assetDetails) => assetDetails.assetId)
+  assetDetails: AssetDetails;
+
+  // Link to Employee who created the asset
   @ManyToOne(() => Employee)
   @JoinColumn({ name: 'created_by' })
   createdByEmployee: Employee;
