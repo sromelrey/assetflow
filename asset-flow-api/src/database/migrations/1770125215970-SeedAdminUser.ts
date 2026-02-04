@@ -1,7 +1,9 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 import * as argon2 from 'argon2';
 
-export class SeedAdminUser1700000000000 implements MigrationInterface {
+export class SeedAdminUser1770125215970 implements MigrationInterface {
+    name = 'SeedAdminUser1770125215970'
+
     public async up(queryRunner: QueryRunner): Promise<void> {
         const password = await argon2.hash('Admin123!');
         const adminEmail = 'admin@assetflow.com';

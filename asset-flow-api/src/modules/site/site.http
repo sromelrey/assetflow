@@ -1,0 +1,45 @@
+### Admin Login (establish session cookie)
+# @name adminLogin
+POST {{API_BASE_URL}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{TEST_USERNAME}}",
+  "password": "{{TEST_USER_PASSWORD}}"
+}
+
+### Capture Token
+@authToken = {{adminLogin.accessToken}}
+
+### Create Site
+# @name createSite
+POST {{API_BASE_URL}}/site
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "CEBU",
+  "address": "Don Mariano Cui Street, Fuente Osmeña Cir, Cebu City, 6000 Cebu"
+}
+
+### Find All Sites
+GET {{API_BASE_URL}}/site
+Authorization: Bearer {{authToken}}
+
+### Find One Site
+@siteId = {{createSite.id}}
+GET {{API_BASE_URL}}/site/{{siteId}}
+Authorization: Bearer {{authToken}}
+
+### Update Site
+PATCH {{API_BASE_URL}}/site/{{siteId}}
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "Updated Site Name"
+}
+
+### Remove Site
+DELETE {{API_BASE_URL}}/site/{{siteId}}
+Authorization: Bearer {{authToken}}

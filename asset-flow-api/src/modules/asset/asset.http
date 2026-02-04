@@ -1,0 +1,68 @@
+### Admin Login (establish session cookie)
+# @name adminLogin
+POST {{API_BASE_URL}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{TEST_USERNAME}}",
+  "password": "{{TEST_USER_PASSWORD}}"
+}
+
+
+### Capture Token
+@authToken = {{adminLogin.accessToken}}
+
+
+### Create Asset with Details
+# @name createAsset
+POST {{API_BASE_URL}}/asset
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "CHH009200",
+  "serialNo": "J5BSIF000084",
+  "assetNo": "CHH009200",
+  "purchaseDate": "2023-10-26",
+  "status": "Active",
+  "unitId": 1,
+  "categoryId": 1,
+  "details": {
+    "brand": "Apple",
+    "model": "MacBook Pro M3",
+    "ipAddress": "192.168.1.50",
+    "computerName": "CHH-LAP-001",
+    "operatingSystem": "macOS Sonoma",
+    "processor": "M3 Pro",
+    "memory": "16GB",
+    "storage": "512GB SSD",
+    "poNumber": "PO-2023-1026",
+    "manufacturingDate": "2023-01-15",
+    "remarks": "Assigned to radiology head"
+  }
+}
+
+### Find All Assets
+GET {{API_BASE_URL}}/asset
+Authorization: Bearer {{authToken}}
+
+### Find One Asset
+@assetId = {{createAsset.id}}
+GET {{API_BASE_URL}}/asset/{{assetId}}
+Authorization: Bearer {{authToken}}
+
+### Update Asset
+PATCH {{API_BASE_URL}}/asset/{{assetId}}
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "Updated Asset Name",
+  "details": {
+    "remarks": "Updated remarks through nested update"
+  }
+}
+
+### Remove Asset
+DELETE {{API_BASE_URL}}/asset/{{assetId}}
+Authorization: Bearer {{authToken}}

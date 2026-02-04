@@ -1,0 +1,30 @@
+### Create Employee
+# @name createEmployee
+POST {{API_BASE_URL}}/employee
+Content-Type: application/json
+
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@example.com",
+  "position": "Developer",
+  "status": "active"
+}
+
+### Find All Employees
+GET {{API_BASE_URL}}/employee
+
+### Find One Employee
+@employeeId = {{createEmployee.id}}
+GET {{API_BASE_URL}}/employee/{{employeeId}}
+
+### Update Employee
+PATCH {{API_BASE_URL}}/employee/{{employeeId}}
+Content-Type: application/json
+
+{
+  "position": "Senior Developer"
+}
+
+### Remove Employee
+DELETE {{API_BASE_URL}}/employee/{{employeeId}}

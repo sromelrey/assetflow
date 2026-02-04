@@ -1,0 +1,44 @@
+### Admin Login (establish session cookie)
+# @name adminLogin
+POST {{API_BASE_URL}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{TEST_USERNAME}}",
+  "password": "{{TEST_USER_PASSWORD}}"
+}
+
+
+### Capture Token
+@authToken = {{adminLogin.accessToken}}
+
+
+### Create Division
+# @name createDivision
+POST {{API_BASE_URL}}/division
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "Nursing Services",
+  "status": "active",
+  "floorId": 1
+}
+
+### Find All Divisions
+GET {{API_BASE_URL}}/division
+
+### Find One Division
+@divisionId = {{createDivision.id}}
+GET {{API_BASE_URL}}/division/{{divisionId}}
+
+### Update Division
+PATCH {{API_BASE_URL}}/division/{{divisionId}}
+Content-Type: application/json
+
+{
+  "name": "Updated Division Name"
+}
+
+### Remove Division
+DELETE {{API_BASE_URL}}/division/{{divisionId}}

@@ -1,0 +1,41 @@
+### Admin Login (establish session cookie)
+# @name adminLogin
+POST {{API_BASE_URL}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{TEST_USERNAME}}",
+  "password": "{{TEST_USER_PASSWORD}}"
+}
+
+### Capture Token
+@authToken = {{adminLogin.accessToken}}
+
+### Create Floor
+# @name createFloor
+POST {{API_BASE_URL}}/floor
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "floorNumber": "Ground Floor",
+  "buildingId": 1
+}
+
+### Find All Floors
+GET {{API_BASE_URL}}/floor
+
+### Find One Floor
+@floorId = {{createFloor.id}}
+GET {{API_BASE_URL}}/floor/{{floorId}}
+
+### Update Floor
+PATCH {{API_BASE_URL}}/floor/{{floorId}}
+Content-Type: application/json
+
+{
+  "floorNumber": "3rd Floor"
+}
+
+### Remove Floor
+DELETE {{API_BASE_URL}}/floor/{{floorId}}
