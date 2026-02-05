@@ -1,8 +1,93 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@layer base {
+  :root {
+    /* Background: Light Cool Gray - hsl(210, 20%, 98%) */
+    --background: 210 20% 98%;
+    /* Foreground: Deep Navy - hsl(222, 47%, 11%) */
+    --foreground: 222 47% 11%;
+    
+    /* Card: Pure White for contrast against Cool Gray bg */
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    
+    /* Popover: White */
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    
+    /* Primary: AssetFlow Blue - hsl(221, 83%, 53%) */
+    --primary: 221 83% 53%;
+    /* Primary Foreground: White */
+    --primary-foreground: 210 40% 98%;
+    
+    /* Secondary: Soft Slate */
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222 47% 11%;
+    
+    /* Muted: Slate 100 */
+    --muted: 210 40% 96.1%;
+    /* Muted Foreground: Slate 500 - hsl(215, 16%, 47%) */
+    --muted-foreground: 215 16% 47%;
+    
+    /* Accent: Soft Blue/Gray for hovers */
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222 47% 11%;
+    
+    /* Destructive: Red */
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    
+    /* Border: Slate 200 */
+    --border: 214.3 31.8% 91.4%;
+    /* Input: Slate 200 */
+    --input: 214.3 31.8% 91.4%;
+    /* Ring: AssetFlow Blue */
+    --ring: 221 83% 53%;
+    
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* Background: Deep Navy/Slate */
+    --background: 222 47% 11%;
+    /* Foreground: Slate 50 */
+    --foreground: 210 40% 98%;
+    
+    /* Card: Slate 900 */
+    --card: 217 33% 17%;
+    --card-foreground: 210 40% 98%;
+    
+    /* Popover: Slate 900 */
+    --popover: 217 33% 17%;
+    --popover-foreground: 210 40% 98%;
+    
+    /* Primary: AssetFlow Blue (slightly lighter for dark mode) */
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 47% 11%;
+    
+    /* Secondary: Slate 800 */
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+    
+    /* Muted: Slate 800 */
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+    
+    /* Accent: Slate 800 */
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 40% 98%;
+    
+    /* Destructive: Red 900 */
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    
+    /* Border: Slate 800 */
+    --border: 217 33% 17%;
+    /* Input: Slate 800 */
+    --input: 217 33% 17%;
+    /* Ring: AssetFlow Blue */
+    --ring: 217 91% 60%;
+  }
 }
 
 @theme inline {
@@ -12,15 +97,9 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
   font-family: Arial, Helvetica, sans-serif;
 }
+
