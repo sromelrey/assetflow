@@ -12,7 +12,8 @@ import {
   ChevronRight,
   Settings,
   MapPin,
-  ChevronDown
+  ChevronDown,
+  Folder
 } from 'lucide-react';
 
 interface NavItem {
@@ -42,6 +43,11 @@ const navItems: NavItem[] = [
         title: 'Locations',
         href: '/settings/locations',
         icon: MapPin,
+      },
+      {
+        title: 'Categories',
+        href: '/settings/categories',
+        icon: Folder,
       },
     ],
   },
