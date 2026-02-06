@@ -21,8 +21,10 @@ export class BuildingService {
     return this.buildingRepository.save(building);
   }
 
-  findAll() {
+  findAll(siteId?: number) {
+    const whereClause = siteId ? { site: { id: siteId } } : {};
     return this.buildingRepository.find({
+      where: whereClause,
       relations: ['site'],
     });
   }

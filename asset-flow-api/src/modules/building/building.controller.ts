@@ -1,5 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, Query } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiQuery } from '@nestjs/swagger';
 import { BuildingService } from './building.service';
 import { CreateBuildingDto } from './dto/create-building.dto';
 import { UpdateBuildingDto } from './dto/update-building.dto';
@@ -21,8 +21,9 @@ export class BuildingController {
   @Get()
   @ApiOperation({ summary: 'Retrieve all buildings' })
   @ApiResponse({ status: 200, description: 'List of buildings.', type: [Building] })
-  findAll() {
-    return this.buildingService.findAll();
+  @ApiQuery({ name: 'siteId', required: false, type: Number, description: 'Filter by site ID' })
+  findAll(@Query('siteId') siteId?: string) {
+    return this.buildingService.findAll(siteId ? parseInt(siteId) : undefined);
   }
 
   @Get(':id')

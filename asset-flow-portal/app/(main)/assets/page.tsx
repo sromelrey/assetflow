@@ -135,8 +135,7 @@ const mockAssets: Asset[] = [
     name: "Canon ImageCLASS",
     category: "Printer",
     status: "Active",
-    assignedTo: null,
-    location: "Office - Floor 4",
+    assignedTo: "Office - Floor 4",
     acquisitionDate: "2023-06-05",
   },
   {
@@ -204,10 +203,12 @@ export default function AssetsPage() {
             Manage and track all your organization's assets
           </p>
         </div>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" />
-          Add Asset
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button className="gap-2">
+            <Plus className="h-4 w-4" />
+            Add Asset
+          </Button>
+        </div>
       </div>
 
       {/* Split View Layout */}

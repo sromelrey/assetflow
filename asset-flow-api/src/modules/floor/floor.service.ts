@@ -21,8 +21,10 @@ export class FloorService {
     return this.floorRepository.save(floor);
   }
 
-  findAll() {
+  findAll(buildingId?: number) {
+    const whereClause = buildingId ? { building: { id: buildingId } } : {};
     return this.floorRepository.find({
+      where: whereClause,
       relations: ['building'],
     });
   }

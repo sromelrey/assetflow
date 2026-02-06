@@ -1,5 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, Query } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiQuery } from '@nestjs/swagger';
 import { FloorService } from './floor.service';
 import { CreateFloorDto } from './dto/create-floor.dto';
 import { UpdateFloorDto } from './dto/update-floor.dto';
@@ -21,8 +21,9 @@ export class FloorController {
   @Get()
   @ApiOperation({ summary: 'Retrieve all floors' })
   @ApiResponse({ status: 200, description: 'List of floors.', type: [Floor] })
-  findAll() {
-    return this.floorService.findAll();
+  @ApiQuery({ name: 'buildingId', required: false, type: Number, description: 'Filter by building ID' })
+  findAll(@Query('buildingId') buildingId?: string) {
+    return this.floorService.findAll(buildingId ? parseInt(buildingId) : undefined);
   }
 
   @Get(':id')
