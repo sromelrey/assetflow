@@ -13,7 +13,8 @@ import {
   Settings,
   MapPin,
   ChevronDown,
-  Folder
+  Folder,
+  GitBranch
 } from 'lucide-react';
 
 interface NavItem {
@@ -48,6 +49,11 @@ const navItems: NavItem[] = [
         title: 'Categories',
         href: '/settings/categories',
         icon: Folder,
+      },
+      {
+        title: 'Organization',
+        href: '/settings/organization',
+        icon: GitBranch,
       },
     ],
   },

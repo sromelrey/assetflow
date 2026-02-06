@@ -21,8 +21,10 @@ export class DivisionService {
     return this.divisionRepository.save(division);
   }
 
-  findAll() {
+  findAll(floorId?: number) {
+    const whereClause = floorId ? { floor: { id: floorId } } : {};
     return this.divisionRepository.find({
+      where: whereClause,
       relations: ['floor'],
     });
   }

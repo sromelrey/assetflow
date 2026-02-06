@@ -21,8 +21,10 @@ export class DepartmentService {
     return this.departmentRepository.save(department);
   }
 
-  findAll() {
+  findAll(divisionId?: number) {
+    const whereClause = divisionId ? { divisionId: { id: divisionId } } : {};
     return this.departmentRepository.find({
+      where: whereClause,
       relations: ['divisionId'],
     });
   }
