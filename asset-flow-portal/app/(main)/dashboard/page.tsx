@@ -3,8 +3,6 @@
 import React from 'react';
 import { useAppSelector } from '../../../store/hooks';
 import { selectCurrentUser } from '../../../store/auth/authSlice';
-import { useLogoutMutation } from '../../../store/auth/authApiSlice';
-import { useRouter } from 'next/navigation';
 import StatCard from '../../../components/StatCard';
 import { Package, CheckCircle, Wrench, XCircle, TrendingUp, BarChart3 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line } from 'recharts';
@@ -35,18 +33,6 @@ const acquisitionTrendData = [
 
 export default function DashboardPage() {
   const user = useAppSelector(selectCurrentUser);
-  const [logout] = useLogoutMutation();
-  const router = useRouter();
-
-  const handleLogout = async () => {
-    try {
-      await logout({}).unwrap();
-      router.push('/login');
-    } catch (err) {
-      console.error('Logout failed', err);
-      router.push('/login');
-    }
-  };
 
   const totalAssets = assetStatusData.reduce((sum, item) => sum + item.value, 0);
 
@@ -58,12 +44,6 @@ export default function DashboardPage() {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">Welcome back, {user?.name || 'User'}!</p>
         </div>
-        <button
-          onClick={handleLogout}
-          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-        >
-          Logout
-        </button>
       </div>
 
       {/* Stats Cards */}
@@ -112,7 +92,7 @@ export default function DashboardPage() {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                label={({ name, percent }) => `${name}: ${percent ? (percent * 100).toFixed(0) : 0}%`}
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"

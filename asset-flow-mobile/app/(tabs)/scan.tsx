@@ -26,7 +26,7 @@ export default function ScanScreen() {
   }, [hasPermission, requestPermission]);
 
   const codeScanner = useCodeScanner({
-    codeTypes: ['qr', 'ean-13', 'upc-a'],
+    codeTypes: ['qr', 'ean-13', 'upc-a', 'code-128'],
     onCodeScanned: (codes) => {
       if (codes.length > 0 && isActive) {
         setScannedCode(codes[0].value ?? null);

@@ -1,5 +1,3 @@
-"use client"
-
 import { ColumnDef } from "@tanstack/react-table"
 import { MoreHorizontal } from "lucide-react"
 
@@ -12,22 +10,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-
-export type Asset = {
-  id: string
-  assetTag: string
-  name: string
-  category: string
-  status: "Active" | "Under Maintenance" | "Retired"
-  assignedTo: string | null
-  location: string
-  acquisitionDate: string
-}
+import { Asset } from "@/store/api/assetsApi"
 
 const StatusBadge = ({ status }: { status: Asset["status"] }) => {
   const colors = {
     Active: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800",
     "Under Maintenance": "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800",
+    Inactive: "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700",
     Retired: "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700",
   }
 
@@ -40,16 +29,19 @@ const StatusBadge = ({ status }: { status: Asset["status"] }) => {
 
 export const columns: ColumnDef<Asset>[] = [
   {
-    accessorKey: "assetTag",
-    header: "Asset Tag",
+    accessorKey: "assetNo",
+    header: "Asset No",
+    cell: ({ row }) => <div className="font-medium">{row.getValue("assetNo") || "-"}</div>,
   },
   {
     accessorKey: "name",
     header: "Name",
   },
   {
-    accessorKey: "category",
+    id: "category",
+    accessorFn: (row) => row.category?.name,
     header: "Category",
+    cell: ({ row }) => row.original.category?.name || <span className="text-gray-400 italic">-</span>,
   },
   {
     accessorKey: "status",
@@ -57,22 +49,18 @@ export const columns: ColumnDef<Asset>[] = [
     cell: ({ row }) => <StatusBadge status={row.getValue("status")} />,
   },
   {
-    accessorKey: "assignedTo",
-    header: "Assigned To",
-    cell: ({ row }) => {
-      const assignedTo = row.getValue("assignedTo") as string | null
-      return assignedTo ? assignedTo : <span className="text-gray-400 italic">Unassigned</span>
-    },
+    id: "unit",
+    accessorFn: (row) => row.unit?.name,
+    header: "Unit",
+    cell: ({ row }) => row.original.unit?.name || <span className="text-gray-400 italic">-</span>,
   },
   {
-    accessorKey: "location",
-    header: "Location",
-  },
-  {
-    accessorKey: "acquisitionDate",
-    header: "Acquisition Date",
+    accessorKey: "purchaseDate",
+    header: "Purchase Date",
     cell: ({ row }) => {
-      const date = new Date(row.getValue("acquisitionDate"))
+      const dateVal = row.getValue("purchaseDate") as string;
+      if (!dateVal) return <span className="text-gray-400 italic">-</span>;
+      const date = new Date(dateVal)
       return date.toLocaleDateString("en-US", {
         year: "numeric",
         month: "short",
@@ -96,7 +84,7 @@ export const columns: ColumnDef<Asset>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(asset.id)}
+              onClick={() => navigator.clipboard.writeText(asset.id.toString())}
             >
               Copy asset ID
             </DropdownMenuItem>

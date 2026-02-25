@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useLogoutMutation } from '@/store/auth/authApiSlice';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { 
@@ -14,7 +15,8 @@ import {
   MapPin,
   ChevronDown,
   Folder,
-  GitBranch
+  GitBranch,
+  LogOut
 } from 'lucide-react';
 
 interface NavItem {
@@ -63,6 +65,18 @@ export function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<string[]>(['Settings']);
   const pathname = usePathname();
+  const router = useRouter();
+  const [logout] = useLogoutMutation();
+
+  const handleLogout = async () => {
+    try {
+      await logout({}).unwrap();
+      router.push('/login');
+    } catch (err) {
+      console.error('Logout failed', err);
+      router.push('/login');
+    }
+  };
 
   const toggleSubmenu = (title: string) => {
     setExpandedMenus((prev) =>
@@ -171,9 +185,22 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-border">
+      <div className="p-4 border-t border-border flex flex-col gap-2">
+        <Button 
+          variant="ghost" 
+          className={cn(
+            "w-full flex items-center justify-start gap-3 transition-colors",
+            "text-muted-foreground hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30",
+            isCollapsed && "justify-center px-0"
+          )}
+          onClick={handleLogout}
+          title={isCollapsed ? "Logout" : undefined}
+        >
+          <LogOut className="h-5 w-5 shrink-0" />
+          {!isCollapsed && <span>Logout</span>}
+        </Button>
         {!isCollapsed && (
-          <p className="text-xs text-muted-foreground text-center">
+          <p className="text-xs text-muted-foreground text-center mt-2">
             © 2026 Asset Flow
           </p>
         )}
