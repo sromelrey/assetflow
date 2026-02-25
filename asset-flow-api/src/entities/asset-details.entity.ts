@@ -4,46 +4,46 @@ import { Asset } from "./asset.entity";
 
 @Entity({ name: 'asset_details' })
 export class AssetDetails extends CommonEntity {
-    @Column({ type: 'varchar', length: 255 })
+    @Column({ type: 'varchar', length: 255, nullable: true })
     @Index()
     brand: string;
 
-    @Column({ type: 'varchar', length: 255 })
+    @Column({ type: 'varchar', length: 255, nullable: true })
     @Index()
     model: string;
 
-    @Column({ type: 'varchar', length: 255 })
+    @Column({ type: 'varchar', length: 255, nullable: true })
     @Index()
     ipAddress: string;
 
-    @Column({ type: 'varchar', length: 255 })
+    @Column({ type: 'varchar', length: 255, nullable: true })
     @Index()
     computerName: string;
 
-    @Column({ type: 'varchar', length: 255 })
+    @Column({ type: 'varchar', length: 255, nullable: true })
     @Index()
     operatingSystem: string;
 
-    @Column({ type: 'varchar', length: 255 })
+    @Column({ type: 'varchar', length: 255, nullable: true })
     @Index()
     processor: string;
 
-    @Column({ type: 'varchar', length: 255 })
+    @Column({ type: 'varchar', length: 255, nullable: true })
     @Index()
     memory: string;
 
-    @Column({ type: 'varchar', length: 255 })
+    @Column({ type: 'varchar', length: 255, nullable: true })
     @Index()
     storage: string;
 
-    @Column({ type: 'text' })
+    @Column({ type: 'text', nullable: true })
     remarks: string;
 
-    @Column({ type: 'varchar', length: 255 })
+    @Column({ type: 'varchar', length: 255, nullable: true })
     @Index()
     poNumber: string;
 
-    @Column({ type: 'date' })
+    @Column({ type: 'date', nullable: true })
     @Index()
     manufacturingDate: Date;
 

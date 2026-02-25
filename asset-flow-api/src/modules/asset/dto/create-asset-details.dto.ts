@@ -2,55 +2,55 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsDateString, IsNotEmpty, IsOptional, IsObject, IsString } from 'class-validator';
 
 export class CreateAssetDetailsDto {
-  @ApiProperty({ example: 'Apple', description: 'Brand of the asset' })
+  @ApiPropertyOptional({ example: 'Apple', description: 'Brand of the asset' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  brand: string;
+  brand?: string;
 
-  @ApiProperty({ example: 'MacBook Pro', description: 'Model of the asset' })
+  @ApiPropertyOptional({ example: 'MacBook Pro', description: 'Model of the asset' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  model: string;
+  model?: string;
 
-  @ApiProperty({ example: '192.168.1.1', description: 'IP Address of the asset' })
+  @ApiPropertyOptional({ example: '192.168.1.1', description: 'IP Address of the asset' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  ipAddress: string;
+  ipAddress?: string;
 
-  @ApiProperty({ example: 'TECH-MBP-01', description: 'Computer name' })
+  @ApiPropertyOptional({ example: 'TECH-MBP-01', description: 'Computer name' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  computerName: string;
+  computerName?: string;
 
-  @ApiProperty({ example: 'macOS Sonoma', description: 'Operating system' })
+  @ApiPropertyOptional({ example: 'macOS Sonoma', description: 'Operating system' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  operatingSystem: string;
+  operatingSystem?: string;
 
-  @ApiProperty({ example: 'M3 Pro', description: 'Processor details' })
+  @ApiPropertyOptional({ example: 'M3 Pro', description: 'Processor details' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  processor: string;
+  processor?: string;
 
-  @ApiProperty({ example: '16GB', description: 'Memory details' })
+  @ApiPropertyOptional({ example: '16GB', description: 'Memory details' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  memory: string;
+  memory?: string;
 
-  @ApiProperty({ example: '512GB SSD', description: 'Storage details' })
+  @ApiPropertyOptional({ example: '512GB SSD', description: 'Storage details' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  storage: string;
+  storage?: string;
 
-  @ApiProperty({ example: 'PO-2023-001', description: 'Purchase Order number' })
+  @ApiPropertyOptional({ example: 'PO-2023-001', description: 'Purchase Order number' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  poNumber: string;
+  poNumber?: string;
 
-  @ApiProperty({ example: '2023-01-01', description: 'Manufacturing date' })
+  @ApiPropertyOptional({ example: '2023-01-01', description: 'Manufacturing date' })
+  @IsOptional()
   @IsDateString()
-  @IsNotEmpty()
-  manufacturingDate: Date;
+  manufacturingDate?: Date;
 
   @ApiPropertyOptional({ example: '2024-01-01', description: 'Preventive Maintenance date' })
   @IsOptional()
@@ -67,8 +67,8 @@ export class CreateAssetDetailsDto {
   @IsObject()
   metadata?: Record<string, any>;
 
-  @ApiProperty({ example: 'New laptop for development', description: 'General remarks' })
+  @ApiPropertyOptional({ example: 'New laptop for development', description: 'General remarks' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  remarks: string;
+  remarks?: string;
 }

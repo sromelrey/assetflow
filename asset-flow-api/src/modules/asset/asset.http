@@ -42,8 +42,12 @@ Authorization: Bearer {{authToken}}
   }
 }
 
-### Find All Assets
-GET {{API_BASE_URL}}/asset
+### Find All Assets (Paginated)
+GET {{API_BASE_URL}}/asset?limit=5
+Authorization: Bearer {{authToken}}
+
+### Find All Assets (Next Page Cursor)
+GET {{API_BASE_URL}}/asset?limit=5&cursor=5
 Authorization: Bearer {{authToken}}
 
 ### Find One Asset

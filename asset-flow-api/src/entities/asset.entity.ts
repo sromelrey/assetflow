@@ -16,7 +16,7 @@ export class Asset extends CommonEntity {
   @Index({ unique: true })
   serialNo?: string;
 
-  @Column({type:'varchar', length: 100, unique: true})
+  @Column({type:'varchar', length: 100, unique: true, nullable: true})
   @Index()
   assetNo?: string;
 

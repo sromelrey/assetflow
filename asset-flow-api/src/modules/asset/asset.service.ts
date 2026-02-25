@@ -1,13 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Repository, DataSource, MoreThan } from 'typeorm';
 import { CreateAssetDto } from './dto/create-asset.dto';
 import { UpdateAssetDto } from './dto/update-asset.dto';
+import { FindAssetsDto } from './dto/find-assets.dto';
 import { Asset } from '@/entities/asset.entity';
 import { AssetDetails } from '@/entities/asset-details.entity';
 
 @Injectable()
 export class AssetService {
+  private readonly logger = new Logger(AssetService.name);
+
   constructor(
     @InjectRepository(Asset)
     private readonly assetRepository: Repository<Asset>,
@@ -18,9 +21,23 @@ export class AssetService {
 
   async create(createAssetDto: CreateAssetDto) {
     const { unitId, categoryId, details, ...rest } = createAssetDto;
+
+    if (rest.serialNo) {
+      const existingSerial = await this.assetRepository.findOne({ where: { serialNo: rest.serialNo } });
+      if (existingSerial) {
+        throw new ConflictException(`Asset with serial number ${rest.serialNo} already exists`);
+      }
+    }
+
+    if (rest.assetNo) {
+      const existingAssetNo = await this.assetRepository.findOne({ where: { assetNo: rest.assetNo } });
+      if (existingAssetNo) {
+        throw new ConflictException(`Asset with asset number ${rest.assetNo} already exists`);
+      }
+    }
     
     return await this.dataSource.transaction(async (manager) => {
-      console.log('--- Asset Create Transaction Starting ---');
+      this.logger.log('--- Asset Create Transaction Starting ---');
       const asset = manager.create(Asset, {
         ...rest,
         unit: { id: unitId },
@@ -28,10 +45,10 @@ export class AssetService {
       } as any);
 
       const savedAsset = await manager.save(Asset, asset);
-      console.log(`✅ Asset saved with ID: ${savedAsset.id}`);
+      this.logger.log(`✅ Asset saved with ID: ${savedAsset.id}`);
 
       if (details) {
-        console.log(`📦 Saving details for Asset ID: ${savedAsset.id}`);
+        this.logger.log(`📦 Saving details for Asset ID: ${savedAsset.id}`);
         const assetDetails = manager.create(AssetDetails, {
           ...details,
           assetId: { id: savedAsset.id },
@@ -39,25 +56,28 @@ export class AssetService {
         await manager.save(AssetDetails, assetDetails);
       }
 
-      console.log(`🔍 Fetching created asset with relations for ID: ${savedAsset.id}`);
       const result = await manager.findOne(Asset, {
         where: { id: savedAsset.id } as any,
         relations: ['unit', 'category', 'assetDetails'],
       });
 
       if (!result) {
-        console.error(`❌ CRITICAL: Could not find asset with ID ${savedAsset.id} inside transaction!`);
-        // If this happens, it's likely a transaction isolation issue or relation error
+        this.logger.error(`❌ CRITICAL: Could not find asset with ID ${savedAsset.id} inside transaction!`);
         throw new NotFoundException(`Asset with ID ${savedAsset.id} not found (after save)`);
       }
 
-      console.log('--- Asset Create Transaction Successful ---');
+      this.logger.log('--- Asset Create Transaction Successful ---');
       return result;
     });
   }
 
-  findAll() {
+  findAll(query: FindAssetsDto) {
+    const { limit = 10, cursor } = query;
+    
     return this.assetRepository.find({
+      where: cursor ? { id: MoreThan(cursor) } : {},
+      take: limit,
+      order: { id: 'ASC' } as any,
       relations: ['unit', 'category', 'assetDetails'],
     });
   }
@@ -76,6 +96,23 @@ export class AssetService {
   async update(id: number, updateAssetDto: UpdateAssetDto) {
     const { unitId, categoryId, details, ...rest } = updateAssetDto;
     
+    // Ensure asset exists first
+    await this.findOne(id);
+
+    if (rest.serialNo) {
+      const existingSerial = await this.assetRepository.findOne({ where: { serialNo: rest.serialNo } });
+      if (existingSerial && existingSerial.id !== id) {
+        throw new ConflictException(`Asset with serial number ${rest.serialNo} already exists`);
+      }
+    }
+
+    if (rest.assetNo) {
+      const existingAssetNo = await this.assetRepository.findOne({ where: { assetNo: rest.assetNo } });
+      if (existingAssetNo && existingAssetNo.id !== id) {
+        throw new ConflictException(`Asset with asset number ${rest.assetNo} already exists`);
+      }
+    }
+
     return await this.dataSource.transaction(async (manager) => {
       const updateData: any = { ...rest };
       
@@ -114,13 +151,18 @@ export class AssetService {
   }
 
   async remove(id: number) {
-    // Note: If ON DELETE CASCADE is set on AssetDetails relation, we don't need manual deletion.
-    // However, to be safe and explicit:
-    await this.assetDetailsRepository.delete({ assetId: { id } } as any);
-    const result = await this.assetRepository.delete(id);
-    if (result.affected === 0) {
-      throw new NotFoundException(`Asset with ID ${id} not found`);
-    }
-    return { message: `Asset #${id} removed successfully` };
+    // Ensure asset exists first
+    await this.findOne(id);
+
+    return await this.dataSource.transaction(async (manager) => {
+      // Delete details first to avoid FK constraint issues if manual deletion is required
+      await manager.delete(AssetDetails, { assetId: { id } } as any);
+      
+      const result = await manager.delete(Asset, id);
+      if (result.affected === 0) {
+        throw new NotFoundException(`Asset with ID ${id} not found`);
+      }
+      return { message: `Asset #${id} removed successfully` };
+    });
   }
 }

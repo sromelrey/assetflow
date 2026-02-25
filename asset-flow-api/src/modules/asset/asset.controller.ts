@@ -1,12 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards, Query } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { AssetService } from './asset.service';
 import { CreateAssetDto } from './dto/create-asset.dto';
 import { UpdateAssetDto } from './dto/update-asset.dto';
+import { FindAssetsDto } from './dto/find-assets.dto';
 import { Asset } from '@/entities/asset.entity';
+import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 
 @ApiTags('Asset')
+@ApiBearerAuth('JWT-auth')
 @Controller('asset')
+@UseGuards(JwtAuthGuard)
 export class AssetController {
   constructor(private readonly assetService: AssetService) {}
 
@@ -21,8 +25,8 @@ export class AssetController {
   @Get()
   @ApiOperation({ summary: 'Retrieve all assets' })
   @ApiResponse({ status: 200, description: 'List of assets.', type: [Asset] })
-  findAll() {
-    return this.assetService.findAll();
+  findAll(@Query() query: FindAssetsDto) {
+    return this.assetService.findAll(query);
   }
 
   @Get(':id')
