@@ -70,3 +70,16 @@ Authorization: Bearer {{authToken}}
 ### Remove Asset
 DELETE {{API_BASE_URL}}/asset/{{assetId}}
 Authorization: Bearer {{authToken}}
+
+### Find Asset By Asset No
+GET {{API_BASE_URL}}/asset/find-by-no/CHH009200
+Authorization: Bearer {{authToken}}
+
+### Update Asset Status By Asset No
+PATCH {{API_BASE_URL}}/asset/status-by-no/CHH009200
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "status": "Deployed"
+}

@@ -55,7 +55,7 @@ export default function AssetsPage() {
         {/* Card Section - Sticky on desktop */}
         <div className="lg:sticky lg:top-8 lg:self-start">
           <AssetDetailsCard 
-            asset={selectedAsset as any /* Temp cast: need to update AssetDetailsCard */}
+            asset={(assets.find(a => a.id === selectedAsset?.id) || selectedAsset) as any}
             onClose={() => setSelectedAsset(null)}
           />
         </div>

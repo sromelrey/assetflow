@@ -4,6 +4,7 @@ import { AssetService } from './asset.service';
 import { CreateAssetDto } from './dto/create-asset.dto';
 import { UpdateAssetDto } from './dto/update-asset.dto';
 import { FindAssetsDto } from './dto/find-assets.dto';
+import { UpdateAssetStatusDto } from './dto/update-asset-status.dto';
 import { Asset } from '@/entities/asset.entity';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 
@@ -52,5 +53,21 @@ export class AssetController {
   @ApiResponse({ status: 404, description: 'Asset not found.' })
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.assetService.remove(id);
+  }
+  @Get('find-by-no/:assetNo')
+  @ApiOperation({ summary: 'Retrieve a specific asset by asset number' })
+  @ApiResponse({ status: 200, description: 'The asset.', type: Asset })
+  @ApiResponse({ status: 404, description: 'Asset not found.' })
+  findByAssetNo(@Param('assetNo') assetNo: string) {
+    return this.assetService.findByAssetNo(assetNo);
+  }
+
+  @Patch('status-by-no/:assetNo')
+  @ApiOperation({ summary: 'Update an asset status by asset number' })
+  @ApiResponse({ status: 200, description: 'The updated asset.', type: Asset })
+  @ApiResponse({ status: 404, description: 'Asset not found.' })
+  @ApiBody({ type: UpdateAssetStatusDto })
+  updateStatusByAssetNo(@Param('assetNo') assetNo: string, @Body() updateStatusDto: UpdateAssetStatusDto) {
+    return this.assetService.updateStatusByAssetNo(assetNo, updateStatusDto);
   }
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Asset } from '@/store/api/assetsApi';
+import { Asset, useUpdateAssetStatusByNoMutation, AssetStatus } from '@/store/api/assetsApi';
 import {
   Card,
   CardContent,
@@ -9,8 +9,14 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 // Using Edit (Pencil) icon instead of general Package
-import { X, Package, MapPin, User, Calendar, Cpu, HardDrive, Monitor, Hash, FileText, Settings, Pencil } from 'lucide-react';
+import { X, Package, MapPin, User, Calendar, Cpu, HardDrive, Monitor, Hash, FileText, Settings, Pencil, Loader2, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EditAssetModal } from '@/app/(main)/assets/EditAssetModal';
 
@@ -19,20 +25,60 @@ interface AssetDetailsCardProps {
   onClose?: () => void;
 }
 
-const StatusBadge = ({ status }: { status: Asset["status"] }) => {
+const StatusBadge = ({ asset }: { asset: Asset }) => {
+  const [updateStatus, { isLoading }] = useUpdateAssetStatusByNoMutation();
+  const status = asset.status;
+
   const variants = {
     Active: { variant: "default" as const, className: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800" },
-    "Under Maintenance": { variant: "default" as const, className: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800" },
-    Inactive: { variant: "default" as const, className: "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700" },
-    Retired: { variant: "default" as const, className: "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700" },
+    Decommissioned: { variant: "default" as const, className: "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700" },
+    Deployed: { variant: "default" as const, className: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800" },
+    "For Repair": { variant: "default" as const, className: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800" },
+    "For Deployment": { variant: "default" as const, className: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800" },
+    "In Storage": { variant: "default" as const, className: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400 border-purple-200 dark:border-purple-800" },
   };
 
   const config = variants[status];
+  const statuses: AssetStatus[] = ['Active', 'Decommissioned', 'Deployed', 'For Repair', 'For Deployment', 'In Storage'];
+
+  const handleStatusChange = async (newStatus: AssetStatus) => {
+    if (newStatus === status || !asset.assetNo) return;
+    try {
+      await updateStatus({ assetNo: asset.assetNo, status: newStatus }).unwrap();
+    } catch (error) {
+      console.error('Failed to update status', error);
+    }
+  };
+
+  if (!asset.assetNo) {
+    return (
+      <Badge variant={config?.variant || "outline"} className={config?.className}>
+        {status}
+      </Badge>
+    );
+  }
 
   return (
-    <Badge variant={config?.variant || "outline"} className={config?.className}>
-      {status}
-    </Badge>
+    <DropdownMenu>
+      <DropdownMenuTrigger className="focus:outline-none disabled:opacity-50" disabled={isLoading}>
+        <Badge variant={config?.variant || "outline"} className={`${config?.className} cursor-pointer flex items-center gap-1 hover:opacity-80 transition-opacity`}>
+          {isLoading && <Loader2 className="h-3 w-3 animate-spin inline-block" />}
+          {status}
+          <ChevronDown className="h-3 w-3 opacity-50 inline-block" />
+        </Badge>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        {statuses.map((s) => (
+          <DropdownMenuItem 
+            key={s} 
+            onClick={() => handleStatusChange(s)}
+            className={s === status ? "bg-accent" : ""}
+          >
+            {s}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 
@@ -94,7 +140,7 @@ export function AssetDetailsCard({ asset, onClose }: AssetDetailsCardProps) {
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0 sm:pt-1">
-              <StatusBadge status={asset.status} />
+              <StatusBadge asset={asset} />
               {onClose && (
                 <Button
                   variant="ghost"

@@ -5,7 +5,7 @@ import { Category } from './categoriesApi';
 // Note: Ensure `Unit` and `Category` are exported from their respective APIs.
 // Assuming they are, we import them here for strong typing.
 
-export type AssetStatus = 'Active' | 'Inactive' | 'Under Maintenance' | 'Retired';
+export type AssetStatus = 'Active' | 'Decommissioned' | 'Deployed' | 'For Repair' | 'For Deployment' | 'In Storage';
 
 export interface AssetDetails {
   id: number;
@@ -69,7 +69,13 @@ export const assetsApi = apiSlice.injectEndpoints({
         url: '/asset',
         params: params || {},
       }),
-      providesTags: ['Asset'],
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ id }) => ({ type: 'Asset' as const, id })),
+              { type: 'Asset', id: 'LIST' },
+            ]
+          : [{ type: 'Asset', id: 'LIST' }],
     }),
     
     getAssetById: builder.query<Asset, number>({
@@ -83,7 +89,7 @@ export const assetsApi = apiSlice.injectEndpoints({
         method: 'POST',
         body,
       }),
-      invalidatesTags: ['Asset'],
+      invalidatesTags: [{ type: 'Asset', id: 'LIST' }],
     }),
 
     updateAsset: builder.mutation<Asset, { id: number; data: UpdateAssetDto }>({
@@ -92,7 +98,7 @@ export const assetsApi = apiSlice.injectEndpoints({
         method: 'PATCH',
         body: data,
       }),
-      invalidatesTags: (result, error, { id }) => [{ type: 'Asset' as const, id }, 'Asset'],
+      invalidatesTags: (result, error, { id }) => [{ type: 'Asset', id }, { type: 'Asset', id: 'LIST' }],
     }),
 
     deleteAsset: builder.mutation<void, number>({
@@ -100,7 +106,21 @@ export const assetsApi = apiSlice.injectEndpoints({
         url: `/asset/${id}`,
         method: 'DELETE',
       }),
-      invalidatesTags: ['Asset'],
+      invalidatesTags: (result, error, id) => [{ type: 'Asset', id }, { type: 'Asset', id: 'LIST' }],
+    }),
+
+    getAssetByAssetNo: builder.query<Asset, string>({
+      query: (assetNo) => `/asset/find-by-no/${assetNo}`,
+      providesTags: (result, error, arg) => result ? [{ type: 'Asset', id: result.id }] : ['Asset'],
+    }),
+
+    updateAssetStatusByNo: builder.mutation<Asset, { assetNo: string; status: AssetStatus }>({
+      query: ({ assetNo, status }) => ({
+        url: `/asset/status-by-no/${assetNo}`,
+        method: 'PATCH',
+        body: { status },
+      }),
+      invalidatesTags: (result) => result ? [{ type: 'Asset', id: result.id }, { type: 'Asset', id: 'LIST' }] : [{ type: 'Asset', id: 'LIST' }],
     }),
   }),
 });
@@ -111,4 +131,6 @@ export const {
   useCreateAssetMutation,
   useUpdateAssetMutation,
   useDeleteAssetMutation,
+  useGetAssetByAssetNoQuery,
+  useUpdateAssetStatusByNoMutation,
 } = assetsApi;

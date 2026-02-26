@@ -4,6 +4,7 @@ import { Repository, DataSource, MoreThan } from 'typeorm';
 import { CreateAssetDto } from './dto/create-asset.dto';
 import { UpdateAssetDto } from './dto/update-asset.dto';
 import { FindAssetsDto } from './dto/find-assets.dto';
+import { UpdateAssetStatusDto } from './dto/update-asset-status.dto';
 import { Asset } from '@/entities/asset.entity';
 import { AssetDetails } from '@/entities/asset-details.entity';
 
@@ -164,5 +165,22 @@ export class AssetService {
       }
       return { message: `Asset #${id} removed successfully` };
     });
+  }
+  async findByAssetNo(assetNo: string) {
+    const asset = await this.assetRepository.findOne({
+      where: { assetNo },
+      relations: ['unit', 'category', 'assetDetails'],
+    });
+    if (!asset) {
+      throw new NotFoundException(`Asset with asset number ${assetNo} not found`);
+    }
+    return asset;
+  }
+
+  async updateStatusByAssetNo(assetNo: string, updateStatusDto: UpdateAssetStatusDto) {
+    const asset = await this.findByAssetNo(assetNo);
+    await this.assetRepository.update(asset.id, { status: updateStatusDto.status });
+    
+    return this.findOne(asset.id);
   }
 }
