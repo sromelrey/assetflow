@@ -1,5 +1,6 @@
-import { Entity, Column, Index } from 'typeorm';
+import { Entity, Column, Index, ManyToOne, JoinColumn } from 'typeorm';
 import { CommonEntity } from './common.entity';
+import { Unit } from './unit.entity';
 
 @Entity({ name: 'employee' })
 export class Employee extends CommonEntity {
@@ -35,4 +36,9 @@ export class Employee extends CommonEntity {
 
   @Column({ type: 'varchar', length: 50, nullable: true })
   employmentType?: string; // Full-Time, Part-Time, Contract
+
+  @ManyToOne(() => Unit, (unit) => unit.id)
+  @JoinColumn({ name: 'unit_id' })
+  @Index()
+  unit?: Unit;
 }

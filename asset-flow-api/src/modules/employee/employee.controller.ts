@@ -1,11 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { EmployeeService } from './employee.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { Employee } from '@/entities/employee.entity';
+import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 
 @ApiTags('Employee')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('employee')
 export class EmployeeController {
   constructor(private readonly employeeService: EmployeeService) {}
@@ -13,8 +16,10 @@ export class EmployeeController {
   @Post()
   @ApiOperation({ summary: 'Create a new employee' })
   @ApiResponse({ status: 201, description: 'Employee created successfully.', type: Employee })
+  @ApiResponse({ status: 400, description: 'Invalid input data.' })
   @ApiBody({ type: CreateEmployeeDto })
   create(@Body() createEmployeeDto: CreateEmployeeDto) {
+    console.log('[EmployeeController] Creating employee:', createEmployeeDto);
     return this.employeeService.create(createEmployeeDto);
   }
 

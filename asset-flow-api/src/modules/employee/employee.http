@@ -1,26 +1,44 @@
+### Admin Login (establish session cookie)
+# @name adminLogin
+POST {{API_BASE_URL}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{TEST_USERNAME}}",
+  "password": "{{TEST_USER_PASSWORD}}"
+}
+
+### Capture Token
+@authToken = {{adminLogin.accessToken}}
+
 ### Create Employee
 # @name createEmployee
 POST {{API_BASE_URL}}/employee
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "firstName": "John",
   "lastName": "Doe",
   "email": "john.doe@example.com",
   "position": "Developer",
-  "status": "active"
+  "status": "active",
+  "unitId": 1
 }
 
 ### Find All Employees
 GET {{API_BASE_URL}}/employee
+Authorization: Bearer {{authToken}}
 
 ### Find One Employee
 @employeeId = {{createEmployee.id}}
-GET {{API_BASE_URL}}/employee/{{employeeId}}
+GET {{API_BASE_URL}}/employee/1
+Authorization: Bearer {{authToken}}
 
 ### Update Employee
 PATCH {{API_BASE_URL}}/employee/{{employeeId}}
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "position": "Senior Developer"
@@ -28,3 +46,4 @@ Content-Type: application/json
 
 ### Remove Employee
 DELETE {{API_BASE_URL}}/employee/{{employeeId}}
+Authorization: Bearer {{authToken}}
