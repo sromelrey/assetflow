@@ -22,8 +22,7 @@ Authorization: Bearer {{authToken}}
   "lastName": "Doe",
   "email": "john.doe@example.com",
   "position": "Developer",
-  "status": "active",
-  "unitId": 1
+  "status": "active"
 }
 
 ### Find All Employees

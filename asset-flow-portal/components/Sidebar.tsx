@@ -16,7 +16,8 @@ import {
   ChevronDown,
   Folder,
   GitBranch,
-  LogOut
+  LogOut,
+  Users
 } from 'lucide-react';
 
 interface NavItem {
@@ -56,6 +57,11 @@ const navItems: NavItem[] = [
         title: 'Organization',
         href: '/settings/organization',
         icon: GitBranch,
+      },
+      {
+        title: 'Employees',
+        href: '/settings/employees',
+        icon: Users,
       },
     ],
   },

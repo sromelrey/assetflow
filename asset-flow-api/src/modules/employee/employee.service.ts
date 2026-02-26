@@ -32,9 +32,7 @@ export class EmployeeService {
    * @returns List of Employee entities
    */
   findAll() {
-    return this.employeeRepository.find({
-      relations: ['unit', 'unit.departmentId', 'unit.departmentId.divisionId'],
-    });
+    return this.employeeRepository.find();
   }
 
   /**
@@ -47,7 +45,6 @@ export class EmployeeService {
   async findOne(id: number) {
     const employee = await this.employeeRepository.findOne({
       where: { id },
-      relations: ['unit', 'unit.departmentId', 'unit.departmentId.divisionId'],
     });
     if (!employee) {
       throw new NotFoundException(`Employee with ID ${id} not found`);

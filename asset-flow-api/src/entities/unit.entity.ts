@@ -2,7 +2,6 @@ import { Entity, Column, ManyToOne, OneToMany, JoinColumn, Index } from 'typeorm
 import { CommonEntity } from './common.entity';
 import { Asset } from './asset.entity';
 import { Department } from './department.entity';
-import { Employee } from './employee.entity';
 
 @Entity({ name: 'unit' })
 export class Unit extends CommonEntity {
@@ -17,7 +16,4 @@ export class Unit extends CommonEntity {
 
   @OneToMany(() => Asset, (asset) => asset.unit)
   assets: Asset[];
-
-  @OneToMany(() => Employee, (employee) => employee.unit)
-  employees: Employee[];
 }

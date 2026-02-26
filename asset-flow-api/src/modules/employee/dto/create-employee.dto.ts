@@ -46,9 +46,4 @@ export class CreateEmployeeDto {
   @IsOptional()
   @IsString()
   employmentType?: string;
-
-  @ApiPropertyOptional({ example: 1, description: 'ID of the unit the employee belongs to' })
-  @IsOptional()
-  @IsNumber()
-  unitId?: number;
 }
