@@ -3,12 +3,24 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserUpgradeDto } from './dto/user-upgrade.dto';
 import { User } from '@/entities/user.entity';
 
 @ApiTags('User')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Post('upgrade/:employeeId')
+  @ApiOperation({ summary: 'Upgrade an employee to a user' })
+  @ApiResponse({ status: 201, description: 'Employee upgraded to user successfully.', type: User })
+  @ApiResponse({ status: 404, description: 'Employee not found.' })
+  upgrade(
+    @Param('employeeId', ParseIntPipe) employeeId: number,
+    @Body() upgradeDto: UserUpgradeDto,
+  ) {
+    return this.userService.upgradeEmployee(employeeId, upgradeDto);
+  }
 
   @Post()
   @ApiOperation({ summary: 'Create a new user' })

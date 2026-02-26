@@ -4,14 +4,16 @@ import { useMemo } from "react";
 import { EntityManager } from "@/components/entity-manager";
 import { columns } from "./column";
 import { getFormFields } from "./form-fields";
-import { Users } from "lucide-react";
+import { Users, UserPlus } from "lucide-react";
 import { 
   useGetEmployeesQuery, 
   useCreateEmployeeMutation, 
   useUpdateEmployeeMutation, 
   useDeleteEmployeeMutation 
 } from "@/store/api/employeeApi";
+import { useUpgradeEmployeeMutation } from "@/store/api/userApi";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 export default function EmployeesPage() {
   const { data: employees = [], isLoading } = useGetEmployeesQuery();
@@ -19,8 +21,20 @@ export default function EmployeesPage() {
   const [createEmployee] = useCreateEmployeeMutation();
   const [updateEmployee] = useUpdateEmployeeMutation();
   const [deleteEmployee] = useDeleteEmployeeMutation();
+  const [upgradeEmployee] = useUpgradeEmployeeMutation();
 
   const formFields = useMemo(() => getFormFields(), []);
+
+  const handleUpgrade = async (employee: any) => {
+    if (confirm(`Are you sure you want to upgrade ${employee.firstName} ${employee.lastName} to a user? A temporary password 'Password123!' will be assigned.`)) {
+      try {
+        await upgradeEmployee({ employeeId: employee.id, data: {} }).unwrap();
+        toast.success("Employee upgraded to user successfully");
+      } catch (err: any) {
+        toast.error(err.data?.message || "Failed to upgrade employee");
+      }
+    }
+  };
 
   const stats = [
     {
@@ -78,6 +92,20 @@ export default function EmployeesPage() {
       stats={stats}
       isLoading={isLoading}
       searchPlaceholder="Search employees..."
+      extraActions={(item) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+          onClick={(e: React.MouseEvent) => {
+            e.stopPropagation();
+            handleUpgrade(item);
+          }}
+        >
+          <UserPlus className="h-4 w-4 mr-1" />
+          Upgrade
+        </Button>
+      )}
     />
   );
 }

@@ -1,0 +1,10 @@
+### Upgrade Employee to User
+POST {{host}}/user/upgrade/1
+Content-Type: application/json
+
+{
+    "role": "standard"
+}
+
+### Find All Users (to verify upgrade)
+GET {{host}}/user

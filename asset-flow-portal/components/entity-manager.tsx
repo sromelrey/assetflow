@@ -51,6 +51,7 @@ interface EntityManagerProps<T> {
   stats?: any[];
   searchPlaceholder?: string;
   isLoading?: boolean;
+  extraActions?: (item: T) => React.ReactNode;
 }
 
 export function EntityManager<T>({
@@ -66,6 +67,7 @@ export function EntityManager<T>({
   stats,
   searchPlaceholder = "Search...",
   isLoading = false,
+  extraActions,
 }: EntityManagerProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -153,6 +155,7 @@ export function EntityManager<T>({
               cell: ({ row }: any) => {
                 return (
                   <div className="flex justify-end gap-2">
+                    {extraActions && extraActions(row.original)}
                     <Button
                       variant="ghost"
                       size="sm"
