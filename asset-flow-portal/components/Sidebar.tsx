@@ -167,9 +167,9 @@ export function Sidebar() {
         isCollapsed ? "justify-center" : "justify-between"
       )}>
         {!isCollapsed && (
-          <span className="text-lg font-semibold text-foreground">
-            Asset Flow
-          </span>
+          <div className="flex flex-col items-center gap-2">
+            <img src="/logo.png" alt="Logo" className="h-16 w-auto" />
+          </div>
         )}
         <Button
           variant="ghost"
@@ -207,7 +207,7 @@ export function Sidebar() {
         </Button>
         {!isCollapsed && (
           <p className="text-xs text-muted-foreground text-center mt-2">
-            © 2026 Asset Flow
+            © 2026 Chonghua Asset Management System
           </p>
         )}
       </div>

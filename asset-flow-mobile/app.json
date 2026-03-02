@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "asset-flow-mobile",
-    "slug": "asset-flow-mobile",
+    "name": "Chonghua Asset Management System",
+    "slug": "chonghua-asset-management-system",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "assetflowmobile",
+    "scheme": "chonghua-asset",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -26,7 +26,7 @@
       "permissions": [
         "android.permission.CAMERA"
       ],
-      "package": "com.sromelrey.assetflowmobile"
+      "package": "com.sromelrey.chonghuaasset"
     },
     "web": {
       "output": "static",

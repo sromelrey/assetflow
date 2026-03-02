@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, Alert, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
 
@@ -34,7 +34,14 @@ export default function LoginScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View style={styles.content}>
-        <Text style={styles.headerTitle}>Welcome to Asset Flow</Text>
+        <View style={styles.logoContainer}>
+          <Image 
+            source={require('../assets/images/logo.png')} 
+            style={styles.logo} 
+            resizeMode="contain"
+          />
+        </View>
+        <Text style={styles.headerTitle}>Chonghua Asset Management System</Text>
         <Text style={styles.headerSubtitle}>Sign in to manage your assets securely</Text>
 
         <TextInput
@@ -81,6 +88,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 24,
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  logo: {
+    width: 120,
+    height: 120,
   },
   headerTitle: {
     fontSize: 28,

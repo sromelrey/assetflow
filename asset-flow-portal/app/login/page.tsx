@@ -26,8 +26,11 @@ function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-gray-900">
       <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-8 shadow-lg dark:bg-gray-800">
         <div className="text-center">
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">
-            Asset Flow Portal
+          <div className="flex justify-center mb-4">
+            <img src="/logo.png" alt="Chonghua Logo" className="h-16 w-auto" />
+          </div>
+          <h2 className="mt-6 text-2xl font-extrabold text-gray-900 dark:text-white">
+            Chonghua Asset Management System
           </h2>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
             Sign in to your account
