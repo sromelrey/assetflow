@@ -1,4 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table"
+import Link from "next/link"
 import { MoreHorizontal } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -91,7 +92,9 @@ export const columns: ColumnDef<Asset>[] = [
               Copy asset ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View details</DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href={`/assets/${asset.id}`}>View details</Link>
+            </DropdownMenuItem>
             <DropdownMenuItem>Edit asset</DropdownMenuItem>
             <DropdownMenuItem className="text-red-600 dark:text-red-400">
               Delete asset

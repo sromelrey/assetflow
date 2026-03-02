@@ -15,8 +15,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import Link from 'next/link';
 // Using Edit (Pencil) icon instead of general Package
-import { X, Package, MapPin, User, Calendar, Cpu, HardDrive, Monitor, Hash, FileText, Settings, Pencil, Loader2, ChevronDown } from 'lucide-react';
+import { X, Package, MapPin, User, Calendar, Cpu, HardDrive, Monitor, Hash, FileText, Settings, Pencil, Loader2, ChevronDown, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EditAssetModal } from '@/app/(main)/assets/EditAssetModal';
 
@@ -118,15 +119,28 @@ export function AssetDetailsCard({ asset, onClose }: AssetDetailsCardProps) {
             <div className="flex-1 min-w-0 pr-2">
               <div className="flex items-center gap-3 mb-1 mt-1">
                 <CardTitle className="text-2xl text-foreground leading-tight break-all">{asset.name}</CardTitle>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-8 px-2 text-muted-foreground hover:text-foreground shrink-0"
-                  onClick={() => setIsEditModalOpen(true)}
-                >
-                  <Pencil className="h-4 w-4 mr-1.5" />
-                  Edit
-                </Button>
+                <div className="flex items-center gap-1 shrink-0">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 px-2 text-muted-foreground hover:text-foreground"
+                    onClick={() => setIsEditModalOpen(true)}
+                  >
+                    <Pencil className="h-4 w-4 mr-1.5" />
+                    Edit
+                  </Button>
+                  <Button
+                    asChild
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-2 text-muted-foreground hover:text-foreground"
+                  >
+                    <Link href={`/assets/${asset.id}`}>
+                      <ExternalLink className="h-4 w-4 mr-1.5" />
+                      Full Page
+                    </Link>
+                  </Button>
+                </div>
               </div>
               <div className="flex flex-wrap items-center gap-2 mt-2">
                 <Badge variant="outline" className="text-xs font-normal">
