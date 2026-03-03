@@ -117,7 +117,7 @@ export function AssetDetailsCard({ asset, onClose }: AssetDetailsCardProps) {
         <CardHeader className="pb-4">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div className="flex-1 min-w-0 pr-2">
-              <div className="flex items-center gap-3 mb-1 mt-1">
+              <div className="flex flex-col items-center gap-3 mb-1 mt-1">
                 <CardTitle className="text-2xl text-foreground leading-tight break-all">{asset.name}</CardTitle>
                 <div className="flex items-center gap-1 shrink-0">
                   <Button 

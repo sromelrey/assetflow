@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource, MoreThan } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { CreateAssetDto } from './dto/create-asset.dto';
 import { UpdateAssetDto } from './dto/update-asset.dto';
 import { FindAssetsDto } from './dto/find-assets.dto';
@@ -72,21 +72,58 @@ export class AssetService {
     });
   }
 
+  /**
+   * Retrieves a paginated, filtered list of assets using cursor-based pagination.
+   *
+   * @param query - Pagination and filter options
+   * @returns Array of matching Asset entities with full hierarchy relations
+   */
   findAll(query: FindAssetsDto) {
-    const { limit = 10, cursor } = query;
-    
-    return this.assetRepository.find({
-      where: cursor ? { id: MoreThan(cursor) } : {},
-      take: limit,
-      order: { id: 'ASC' } as any,
-      relations: ['unit', 'category', 'assetDetails'],
-    });
+    const { limit = 20, cursor, search, status, categoryId, siteId, buildingId, floorId, divisionId, departmentId } = query;
+
+    const qb = this.assetRepository.createQueryBuilder('asset')
+      .leftJoinAndSelect('asset.unit', 'unit')
+      .leftJoinAndSelect('unit.departmentId', 'department')
+      .leftJoinAndSelect('department.divisionId', 'division')
+      .leftJoinAndSelect('division.floor', 'floor')
+      .leftJoinAndSelect('floor.building', 'building')
+      .leftJoinAndSelect('building.site', 'site')
+      .leftJoinAndSelect('asset.category', 'category')
+      .leftJoinAndSelect('asset.assetDetails', 'assetDetails')
+      .orderBy('asset.id', 'ASC')
+      .take(limit);
+
+    if (cursor)       qb.andWhere('asset.id > :cursor',              { cursor });
+    if (search) {
+      qb.andWhere(
+        '(asset.name ILIKE :q OR asset.assetNo ILIKE :q OR COALESCE(category.name, \'\') ILIKE :q OR asset.status::text ILIKE :q OR COALESCE(unit.name, \'\') ILIKE :q OR COALESCE(department.name, \'\') ILIKE :q OR COALESCE(building.name, \'\') ILIKE :q OR COALESCE(site.name, \'\') ILIKE :q)',
+        { q: `%${search}%` }
+      );
+    }
+    if (status)       qb.andWhere('asset.status = :status',          { status });
+    if (categoryId)   qb.andWhere('category.id = :categoryId',       { categoryId });
+    if (siteId)       qb.andWhere('site.id = :siteId',               { siteId });
+    if (buildingId)   qb.andWhere('building.id = :buildingId',       { buildingId });
+    if (floorId)      qb.andWhere('floor.id = :floorId',             { floorId });
+    if (divisionId)   qb.andWhere('division.id = :divisionId',       { divisionId });
+    if (departmentId) qb.andWhere('department.id = :departmentId',   { departmentId });
+
+    return qb.getMany();
   }
 
   async findOne(id: number) {
     const asset = await this.assetRepository.findOne({
       where: { id },
-      relations: ['unit', 'category', 'assetDetails'],
+      relations: [
+        'unit',
+        'unit.departmentId',
+        'unit.departmentId.divisionId',
+        'unit.departmentId.divisionId.floor',
+        'unit.departmentId.divisionId.floor.building',
+        'unit.departmentId.divisionId.floor.building.site',
+        'category',
+        'assetDetails',
+      ],
     });
     if (!asset) {
       throw new NotFoundException(`Asset with ID ${id} not found`);

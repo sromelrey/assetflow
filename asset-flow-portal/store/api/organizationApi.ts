@@ -46,7 +46,17 @@ export interface UpdateDepartmentDto {
 export interface Unit {
   id: number;
   name: string;
-  departmentId?: Department;
+  departmentId?: Department & {
+    divisionId?: Division & {
+      floor?: Floor & {
+        building?: {
+          id: number;
+          name: string;
+          site?: { id: number; name: string };
+        };
+      };
+    };
+  };
   createdAt: string;
   updatedAt: string;
 }

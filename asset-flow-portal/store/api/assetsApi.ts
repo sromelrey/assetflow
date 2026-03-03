@@ -60,6 +60,14 @@ export interface UpdateAssetDto extends Partial<CreateAssetDto> {}
 export interface FindAssetsDto {
   limit?: number;
   cursor?: number;
+  search?: string;
+  status?: AssetStatus;
+  categoryId?: number;
+  siteId?: number;
+  buildingId?: number;
+  floorId?: number;
+  divisionId?: number;
+  departmentId?: number;
 }
 
 export const assetsApi = apiSlice.injectEndpoints({
