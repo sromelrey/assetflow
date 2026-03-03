@@ -4,9 +4,11 @@ import { Repository, DataSource } from 'typeorm';
 import { CreateAssetDto } from './dto/create-asset.dto';
 import { UpdateAssetDto } from './dto/update-asset.dto';
 import { FindAssetsDto } from './dto/find-assets.dto';
+import { AssetMetricsDto } from './dto/asset-metrics.dto';
 import { UpdateAssetStatusDto } from './dto/update-asset-status.dto';
 import { Asset } from '@/entities/asset.entity';
 import { AssetDetails } from '@/entities/asset-details.entity';
+import { AssetStatus } from '@/types/enums';
 
 @Injectable()
 export class AssetService {
@@ -109,6 +111,101 @@ export class AssetService {
     if (departmentId) qb.andWhere('department.id = :departmentId',   { departmentId });
 
     return qb.getMany();
+  }
+
+  /**
+   * Aggregates dashboard metrics for the assets including status and category distributions,
+   * total counts by bucket, and a 6-month acquisition trend.
+   *
+   * @param siteId Optional site ID to filter metrics
+   * @returns Promise resolving to an AssetMetricsDto
+   */
+  async getMetrics(siteId?: number): Promise<AssetMetricsDto> {
+    
+    // Helper to build a base query builder with the site filter if provided
+    const getBaseQuery = () => {
+      const q = this.assetRepository.createQueryBuilder('asset')
+        .leftJoin('asset.unit', 'unit')
+        .leftJoin('unit.departmentId', 'department')
+        .leftJoin('department.divisionId', 'division')
+        .leftJoin('division.floor', 'floor')
+        .leftJoin('floor.building', 'building')
+        .leftJoin('building.site', 'site');
+
+      if (siteId) {
+        q.andWhere('site.id = :siteId', { siteId });
+      }
+      return q;
+    };
+
+    const [
+      totalAssets,
+      active,
+      underMaintenance,
+      retired,
+      statusDistRaw,
+      categoryDistRaw,
+      trendRaw
+    ] = await Promise.all([
+      getBaseQuery().getCount(),
+
+      getBaseQuery()
+        .andWhere('(asset.status = :active OR asset.status = :deployed)', { 
+          active: AssetStatus.ACTIVE, deployed: AssetStatus.DEPLOYED 
+        })
+        .getCount(),
+
+      getBaseQuery()
+        .andWhere('asset.status = :repair', { repair: AssetStatus.FOR_REPAIR })
+        .getCount(),
+
+      getBaseQuery()
+        .andWhere('asset.status = :retired', { retired: AssetStatus.DECOMMISSIONED })
+        .getCount(),
+
+      getBaseQuery()
+        .select('asset.status', 'status')
+        .addSelect('COUNT(*)::int', 'count')
+        .groupBy('asset.status')
+        .getRawMany(),
+
+      getBaseQuery()
+        .leftJoin('asset.category', 'category')
+        .select('category.name', 'category')
+        .addSelect('COUNT(*)::int', 'count')
+        .groupBy('category.name')
+        .getRawMany(),
+
+      // Acquisition trend (last 6 months)
+      getBaseQuery()
+        .select("TO_CHAR(asset.created_at, 'Mon')", 'month')
+        .addSelect("TO_CHAR(asset.created_at, 'YYYY-MM')", 'sortKey')
+        .addSelect('COUNT(*)::int', 'count')
+        .andWhere("asset.created_at >= NOW() - INTERVAL '6 months'")
+        .groupBy("TO_CHAR(asset.created_at, 'Mon')")
+        .addGroupBy("TO_CHAR(asset.created_at, 'YYYY-MM')")
+        .orderBy("TO_CHAR(asset.created_at, 'YYYY-MM')", 'ASC')
+        .getRawMany()
+    ]);
+
+    return {
+      totalAssets,
+      active,
+      underMaintenance,
+      retired,
+      statusDistribution: statusDistRaw.map(s => ({
+        status: s.status,
+        count: Number(s.count) || 0,
+      })),
+      categoryDistribution: categoryDistRaw.map(c => ({
+        category: c.category || 'Uncategorized',
+        count: Number(c.count) || 0,
+      })),
+      acquisitionTrend: trendRaw.map(t => ({
+        month: t.month,
+        count: Number(t.count) || 0,
+      })),
+    };
   }
 
   async findOne(id: number) {

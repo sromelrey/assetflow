@@ -233,15 +233,17 @@ export default function AssetsPage() {
             <SelectValue placeholder="All Categories" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value={NONE}>All Categories</SelectItem>
             {categories.map((c) => <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>)}
           </SelectContent>
         </Select>
 
-        <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as AssetStatus | '')}>
+        <Select value={statusFilter || NONE} onValueChange={(v) => setStatusFilter(v !== NONE ? v as AssetStatus : '')}>
           <SelectTrigger id="status-filter" className="w-[160px]">
             <SelectValue placeholder="All Statuses" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value={NONE}>All Statuses</SelectItem>
             {ASSET_STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
           </SelectContent>
         </Select>

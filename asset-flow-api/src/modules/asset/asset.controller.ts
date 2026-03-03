@@ -4,6 +4,7 @@ import { AssetService } from './asset.service';
 import { CreateAssetDto } from './dto/create-asset.dto';
 import { UpdateAssetDto } from './dto/update-asset.dto';
 import { FindAssetsDto } from './dto/find-assets.dto';
+import { AssetMetricsDto } from './dto/asset-metrics.dto';
 import { UpdateAssetStatusDto } from './dto/update-asset-status.dto';
 import { Asset } from '@/entities/asset.entity';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
@@ -28,6 +29,13 @@ export class AssetController {
   @ApiResponse({ status: 200, description: 'List of assets.', type: [Asset] })
   findAll(@Query() query: FindAssetsDto) {
     return this.assetService.findAll(query);
+  }
+
+  @Get('metrics')
+  @ApiOperation({ summary: 'Retrieve dashboard metrics for assets' })
+  @ApiResponse({ status: 200, description: 'Aggregated metrics for the dashboard.', type: AssetMetricsDto })
+  getMetrics(@Query('siteId') siteId?: string) {
+    return this.assetService.getMetrics(siteId ? Number(siteId) : undefined);
   }
 
   @Get(':id')

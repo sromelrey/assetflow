@@ -70,6 +70,31 @@ export interface FindAssetsDto {
   departmentId?: number;
 }
 
+export interface StatusDistributionItem {
+  status: string;
+  count: number;
+}
+
+export interface CategoryDistributionItem {
+  category: string;
+  count: number;
+}
+
+export interface AcquisitionTrendItem {
+  month: string;
+  count: number;
+}
+
+export interface AssetMetrics {
+  totalAssets: number;
+  active: number;
+  underMaintenance: number;
+  retired: number;
+  statusDistribution: StatusDistributionItem[];
+  categoryDistribution: CategoryDistributionItem[];
+  acquisitionTrend: AcquisitionTrendItem[];
+}
+
 export const assetsApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getAssets: builder.query<Asset[], FindAssetsDto | void>({
@@ -130,6 +155,14 @@ export const assetsApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: (result) => result ? [{ type: 'Asset', id: result.id }, { type: 'Asset', id: 'LIST' }] : [{ type: 'Asset', id: 'LIST' }],
     }),
+
+    getAssetMetrics: builder.query<AssetMetrics, number | string | void>({
+      query: (siteId) => ({
+        url: '/asset/metrics',
+        params: siteId ? { siteId } : {},
+      }),
+      providesTags: ['Asset'],
+    }),
   }),
 });
 
@@ -141,4 +174,5 @@ export const {
   useDeleteAssetMutation,
   useGetAssetByAssetNoQuery,
   useUpdateAssetStatusByNoMutation,
+  useGetAssetMetricsQuery,
 } = assetsApi;
