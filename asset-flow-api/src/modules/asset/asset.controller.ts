@@ -38,6 +38,13 @@ export class AssetController {
     return this.assetService.getMetrics(siteId ? Number(siteId) : undefined);
   }
 
+  @Get('status-history')
+  @ApiOperation({ summary: 'Retrieve all asset status history' })
+  @ApiResponse({ status: 200, description: 'List of all status changes.' })
+  getAllStatusHistory() {
+    return this.assetService.getStatusHistory();
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Retrieve a specific asset' })
   @ApiResponse({ status: 200, description: 'The asset.', type: Asset })
@@ -77,5 +84,12 @@ export class AssetController {
   @ApiBody({ type: UpdateAssetStatusDto })
   updateStatusByAssetNo(@Param('assetNo') assetNo: string, @Body() updateStatusDto: UpdateAssetStatusDto) {
     return this.assetService.updateStatusByAssetNo(assetNo, updateStatusDto);
+  }
+
+  @Get(':id/status-history')
+  @ApiOperation({ summary: 'Retrieve status history for a specific asset' })
+  @ApiResponse({ status: 200, description: 'List of status changes.' })
+  getStatusHistory(@Param('id', ParseIntPipe) id: number) {
+    return this.assetService.getStatusHistory(id);
   }
 }

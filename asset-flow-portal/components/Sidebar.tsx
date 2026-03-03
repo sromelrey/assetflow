@@ -17,7 +17,8 @@ import {
   Folder,
   GitBranch,
   LogOut,
-  Users
+  Users,
+  History
 } from 'lucide-react';
 
 interface NavItem {
@@ -37,6 +38,11 @@ const navItems: NavItem[] = [
     title: 'Assets',
     href: '/assets',
     icon: Package,
+  },
+  {
+    title: 'Status History',
+    href: '/assets/status-history',
+    icon: History,
   },
   {
     title: 'Settings',

@@ -8,6 +8,7 @@ import { AssetMetricsDto } from './dto/asset-metrics.dto';
 import { UpdateAssetStatusDto } from './dto/update-asset-status.dto';
 import { Asset } from '@/entities/asset.entity';
 import { AssetDetails } from '@/entities/asset-details.entity';
+import { AssetStatusLog } from '@/entities/asset-status-log.entity';
 import { AssetStatus } from '@/types/enums';
 
 @Injectable()
@@ -19,6 +20,8 @@ export class AssetService {
     private readonly assetRepository: Repository<Asset>,
     @InjectRepository(AssetDetails)
     private readonly assetDetailsRepository: Repository<AssetDetails>,
+    @InjectRepository(AssetStatusLog)
+    private readonly assetStatusLogRepository: Repository<AssetStatusLog>,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -232,7 +235,7 @@ export class AssetService {
     const { unitId, categoryId, details, ...rest } = updateAssetDto;
     
     // Ensure asset exists first
-    await this.findOne(id);
+    const asset = await this.findOne(id);
 
     if (rest.serialNo) {
       const existingSerial = await this.assetRepository.findOne({ where: { serialNo: rest.serialNo } });
@@ -256,6 +259,15 @@ export class AssetService {
       }
       if (categoryId) {
         updateData.category = { id: categoryId };
+      }
+
+      if (updateData.status && updateData.status !== asset.status) {
+        const log = manager.create(AssetStatusLog, {
+          asset: { id },
+          oldStatus: asset.status,
+          newStatus: updateData.status,
+        } as any);
+        await manager.save(AssetStatusLog, log);
       }
 
       if (Object.keys(updateData).length > 0) {
@@ -313,8 +325,31 @@ export class AssetService {
 
   async updateStatusByAssetNo(assetNo: string, updateStatusDto: UpdateAssetStatusDto) {
     const asset = await this.findByAssetNo(assetNo);
-    await this.assetRepository.update(asset.id, { status: updateStatusDto.status });
+    
+    if (asset.status !== updateStatusDto.status) {
+      await this.dataSource.transaction(async (manager) => {
+        await manager.update(Asset, asset.id, { status: updateStatusDto.status });
+        const log = manager.create(AssetStatusLog, {
+          asset: { id: asset.id },
+          oldStatus: asset.status,
+          newStatus: updateStatusDto.status,
+        } as any);
+        await manager.save(AssetStatusLog, log);
+      });
+    }
     
     return this.findOne(asset.id);
+  }
+
+  async getStatusHistory(assetId?: number) {
+    const where: any = {};
+    if (assetId) {
+      where.asset = { id: assetId };
+    }
+    return this.assetStatusLogRepository.find({
+      where,
+      relations: ['asset'],
+      order: { createdAt: 'DESC' },
+    });
   }
 }

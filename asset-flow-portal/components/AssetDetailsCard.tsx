@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Link from 'next/link';
 // Using Edit (Pencil) icon instead of general Package
-import { X, Package, MapPin, User, Calendar, Cpu, HardDrive, Monitor, Hash, FileText, Settings, Pencil, Loader2, ChevronDown, ExternalLink } from 'lucide-react';
+import { X, Package, MapPin, User, Calendar, Cpu, HardDrive, Monitor, Hash, FileText, Settings, Pencil, Loader2, ChevronDown, ExternalLink, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EditAssetModal } from '@/app/(main)/assets/EditAssetModal';
 
@@ -138,6 +138,17 @@ export function AssetDetailsCard({ asset, onClose }: AssetDetailsCardProps) {
                     <Link href={`/assets/${asset.id}`}>
                       <ExternalLink className="h-4 w-4 mr-1.5" />
                       Full Page
+                    </Link>
+                  </Button>
+                  <Button
+                    asChild
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-2 text-muted-foreground hover:text-foreground"
+                  >
+                    <Link href={`/assets/status-history?assetId=${asset.id}`}>
+                      <History className="h-4 w-4 mr-1.5" />
+                      History
                     </Link>
                   </Button>
                 </div>
