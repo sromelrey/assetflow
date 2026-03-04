@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { DataTable } from '@/components/data-table';
 import StatCard from '@/components/StatCard';
 import { columns } from './column';
@@ -8,7 +8,7 @@ import { useGetAssetStatusHistoryQuery } from '@/store/api/assetsHistoryApi';
 import { History, Package, Clock, ArrowRightLeft } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 
-export default function AssetStatusHistoryPage() {
+function AssetStatusHistoryContent() {
   const searchParams = useSearchParams();
   const assetIdParam = searchParams.get('assetId');
   const assetId = assetIdParam ? Number(assetIdParam) : undefined;
@@ -79,3 +79,12 @@ export default function AssetStatusHistoryPage() {
     </div>
   );
 }
+
+export default function AssetStatusHistoryPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Loading...</div>}>
+      <AssetStatusHistoryContent />
+    </Suspense>
+  );
+}
+

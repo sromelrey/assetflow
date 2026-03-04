@@ -18,7 +18,8 @@ import {
   GitBranch,
   LogOut,
   Users,
-  History
+  History,
+  QrCode
 } from 'lucide-react';
 
 interface NavItem {
@@ -43,6 +44,11 @@ const navItems: NavItem[] = [
     title: 'Status History',
     href: '/assets/status-history',
     icon: History,
+  },
+  {
+    title: 'QR Print',
+    href: '/assets/qr-print',
+    icon: QrCode,
   },
   {
     title: 'Settings',

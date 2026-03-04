@@ -17,6 +17,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { QRCodeSVG } from 'qrcode.react';
+import {
   ArrowLeft,
   Pencil,
   ChevronDown,
@@ -28,6 +35,8 @@ import {
   FileText,
   Hash,
   MapPin,
+  QrCode,
+  Printer,
 } from 'lucide-react';
 import { EditAssetModal } from '@/app/(main)/assets/EditAssetModal';
 import { toast } from 'sonner';
@@ -110,7 +119,11 @@ function SectionCard({ title, icon, children }: SectionCardProps) {
 
 export function AssetDetailView({ asset }: AssetDetailViewProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isQrOpen, setIsQrOpen] = useState(false);
   const [updateStatus, { isLoading: isUpdating }] = useUpdateAssetStatusByNoMutation();
+
+  const APP_BASE_URL = 'https://assetflow-alpha.vercel.app';
+  const qrUrl = `${APP_BASE_URL}/assets/${asset.id}`;
 
   const details = asset.assetDetails;
   const bannerColor = STATUS_COLORS[asset.status] ?? 'bg-slate-500';
@@ -198,7 +211,16 @@ export function AssetDetailView({ asset }: AssetDetailViewProps) {
             </div>
           </div>
 
-          <div className="shrink-0">
+          <div className="shrink-0 flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsQrOpen(true)}
+              className="gap-2"
+            >
+              <QrCode className="h-4 w-4" />
+              QR Code
+            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -301,6 +323,48 @@ export function AssetDetailView({ asset }: AssetDetailViewProps) {
           onOpenChange={setIsEditModalOpen}
         />
       )}
+
+      {/* QR Code Modal */}
+      <Dialog open={isQrOpen} onOpenChange={setIsQrOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <QrCode className="h-5 w-5 text-primary" />
+              QR Code
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center gap-4 py-4">
+            {/* QR Code */}
+            <div className="p-4 bg-white rounded-xl border shadow-sm">
+              <QRCodeSVG
+                value={qrUrl}
+                size={200}
+                level="M"
+                includeMargin={false}
+              />
+            </div>
+
+            {/* Asset info below QR */}
+            <div className="text-center space-y-1">
+              <p className="font-semibold text-foreground">{asset.name}</p>
+              {asset.assetNo && (
+                <p className="text-sm text-muted-foreground font-mono">#{asset.assetNo}</p>
+              )}
+              <p className="text-xs text-muted-foreground">{asset.category?.name}</p>
+            </div>
+
+            {/* Print button */}
+            <Button
+              variant="default"
+              className="gap-2 w-full"
+              onClick={() => window.print()}
+            >
+              <Printer className="h-4 w-4" />
+              Print Sticker
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
