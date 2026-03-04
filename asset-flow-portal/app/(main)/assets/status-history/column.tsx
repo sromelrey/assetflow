@@ -64,6 +64,27 @@ export const columns: ColumnDef<AssetStatusLog>[] = [
     },
   },
   {
+    header: 'Changed By',
+    accessorKey: 'changedBy',
+    cell: ({ row }) => {
+      const user = row.original.changedBy;
+      if (!user) return <span className="text-sm text-muted-foreground">System</span>;
+      
+      const fullName = user.firstName && user.lastName 
+        ? `${user.firstName} ${user.lastName}`
+        : user.name;
+        
+      return (
+        <div className="flex flex-col items-start gap-1">
+          <span className="text-sm font-medium">{fullName}</span>
+          <Badge variant="outline" className="text-[10px] h-4 py-0 px-1 bg-muted/50 text-muted-foreground border-transparent">
+            User ID: {user.id}
+          </Badge>
+        </div>
+      );
+    },
+  },
+  {
     header: 'Changed At',
     accessorKey: 'createdAt',
     cell: ({ row }) => {

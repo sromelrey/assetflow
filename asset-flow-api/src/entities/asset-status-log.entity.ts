@@ -2,6 +2,7 @@ import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { CommonEntity } from './common.entity';
 import { Asset } from './asset.entity';
 import { AssetStatus } from '@/types/enums';
+import { User } from './user.entity';
 
 @Entity({ name: 'asset_status_log' })
 export class AssetStatusLog extends CommonEntity {
@@ -15,6 +16,10 @@ export class AssetStatusLog extends CommonEntity {
 
   @Column({ type: 'enum', enum: AssetStatus, name: 'new_status' })
   newStatus: AssetStatus;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'changed_by' })
+  changedBy: User;
 
   @Column({ type: 'text', nullable: true })
   remarks?: string;

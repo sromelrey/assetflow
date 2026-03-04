@@ -231,7 +231,7 @@ export class AssetService {
     return asset;
   }
 
-  async update(id: number, updateAssetDto: UpdateAssetDto) {
+  async update(id: number, updateAssetDto: UpdateAssetDto, userId?: number) {
     const { unitId, categoryId, details, ...rest } = updateAssetDto;
     
     // Ensure asset exists first
@@ -262,10 +262,12 @@ export class AssetService {
       }
 
       if (updateData.status && updateData.status !== asset.status) {
+        this.logger.log(`📝 Logging status change for asset ${id} by user ID: ${userId || 'unknown'}`);
         const log = manager.create(AssetStatusLog, {
           asset: { id },
           oldStatus: asset.status,
           newStatus: updateData.status,
+          changedBy: userId ? { id: userId } : undefined,
         } as any);
         await manager.save(AssetStatusLog, log);
       }
@@ -323,16 +325,18 @@ export class AssetService {
     return asset;
   }
 
-  async updateStatusByAssetNo(assetNo: string, updateStatusDto: UpdateAssetStatusDto) {
+  async updateStatusByAssetNo(assetNo: string, updateStatusDto: UpdateAssetStatusDto, userId?: number) {
     const asset = await this.findByAssetNo(assetNo);
     
     if (asset.status !== updateStatusDto.status) {
+      this.logger.log(`📝 Logging status change (by scan) for asset ${asset.id} by user ID: ${userId || 'unknown'}`);
       await this.dataSource.transaction(async (manager) => {
         await manager.update(Asset, asset.id, { status: updateStatusDto.status });
         const log = manager.create(AssetStatusLog, {
           asset: { id: asset.id },
           oldStatus: asset.status,
           newStatus: updateStatusDto.status,
+          changedBy: userId ? { id: userId } : undefined,
         } as any);
         await manager.save(AssetStatusLog, log);
       });
@@ -342,14 +346,15 @@ export class AssetService {
   }
 
   async getStatusHistory(assetId?: number) {
-    const where: any = {};
+    const qb = this.assetStatusLogRepository.createQueryBuilder('log')
+      .leftJoinAndSelect('log.asset', 'asset')
+      .leftJoinAndSelect('log.changedBy', 'changedBy')
+      .orderBy('log.createdAt', 'DESC');
+
     if (assetId) {
-      where.asset = { id: assetId };
+      qb.where('asset.id = :assetId', { assetId });
     }
-    return this.assetStatusLogRepository.find({
-      where,
-      relations: ['asset'],
-      order: { createdAt: 'DESC' },
-    });
+
+    return qb.getMany();
   }
 }

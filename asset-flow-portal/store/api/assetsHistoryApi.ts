@@ -11,6 +11,12 @@ export interface AssetStatusLog {
     name: string;
     assetNo?: string;
   };
+  changedBy?: {
+    id: number;
+    name: string;
+    firstName?: string;
+    lastName?: string;
+  };
 }
 
 export const assetsHistoryApi = apiSlice.injectEndpoints({

@@ -8,6 +8,7 @@ import { AssetMetricsDto } from './dto/asset-metrics.dto';
 import { UpdateAssetStatusDto } from './dto/update-asset-status.dto';
 import { Asset } from '@/entities/asset.entity';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
+import { CurrentUser } from '@/decorators/current-user.decorator';
 
 @ApiTags('Asset')
 @ApiBearerAuth('JWT-auth')
@@ -58,8 +59,12 @@ export class AssetController {
   @ApiResponse({ status: 200, description: 'The updated asset.', type: Asset })
   @ApiResponse({ status: 404, description: 'Asset not found.' })
   @ApiBody({ type: UpdateAssetDto })
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateAssetDto: UpdateAssetDto) {
-    return this.assetService.update(id, updateAssetDto);
+  update(
+    @Param('id', ParseIntPipe) id: number, 
+    @Body() updateAssetDto: UpdateAssetDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.assetService.update(id, updateAssetDto, user.id);
   }
 
   @Delete(':id')
@@ -82,8 +87,12 @@ export class AssetController {
   @ApiResponse({ status: 200, description: 'The updated asset.', type: Asset })
   @ApiResponse({ status: 404, description: 'Asset not found.' })
   @ApiBody({ type: UpdateAssetStatusDto })
-  updateStatusByAssetNo(@Param('assetNo') assetNo: string, @Body() updateStatusDto: UpdateAssetStatusDto) {
-    return this.assetService.updateStatusByAssetNo(assetNo, updateStatusDto);
+  updateStatusByAssetNo(
+    @Param('assetNo') assetNo: string, 
+    @Body() updateStatusDto: UpdateAssetStatusDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.assetService.updateStatusByAssetNo(assetNo, updateStatusDto, user.id);
   }
 
   @Get(':id/status-history')
