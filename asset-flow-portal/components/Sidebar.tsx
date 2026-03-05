@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useLogoutMutation } from '@/store/auth/authApiSlice';
@@ -85,6 +85,26 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [logout] = useLogoutMutation();
+
+  useEffect(() => {
+    const handleResize = () => {
+      // Auto-collapse on screens smaller than 1024px
+      if (window.innerWidth < 1024) {
+        setIsCollapsed(true);
+      }
+    };
+
+    // Initial check on mount
+    handleResize();
+
+    // Route-specific collapse
+    if (/^\/assets\/\d+$/.test(pathname)) {
+      setIsCollapsed(true);
+    }
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [pathname]);
 
   const handleLogout = async () => {
     try {
