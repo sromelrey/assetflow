@@ -9,6 +9,7 @@ import { CategoryModule } from './modules/category/category.module';
 import { DepartmentModule } from './modules/department/department.module';
 import { DivisionModule } from './modules/division/division.module';
 import { FloorModule } from './modules/floor/floor.module';
+import { HealthModule } from './modules/health/health.module';
 import { SiteModule } from './modules/site/site.module';
 import { UnitModule } from './modules/unit/unit.module';
 import { UserModule } from './modules/user/user.module';
@@ -39,6 +40,7 @@ import { UserModule } from './modules/user/user.module';
     DepartmentModule,
     DivisionModule,
     FloorModule,
+    HealthModule,
     SiteModule,
     UnitModule,
     UserModule,

@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { applyMiddlewares } from '@/middleware';
+import { initKeepAlive } from '@/services/keep-alive.service';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -18,7 +19,7 @@ async function bootstrap() {
   );
   
   // API prefix
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix('api', { exclude: ['health'] });
   
   // Apply middlewares (cors, helmet, etc.)
   applyMiddlewares(app);
@@ -50,6 +51,9 @@ async function bootstrap() {
   await app.listen(port);
   console.log(`🚀 Application is running on: http://localhost:${port}`);
   console.log(`📚 API Documentation: http://localhost:${port}/api/docs`);
+
+  // Initialize keep-alive cron (production only)
+  initKeepAlive();
 }
 
 bootstrap();
