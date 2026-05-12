@@ -22,7 +22,9 @@ export class UnitService {
   }
 
   findAll(departmentId?: number) {
-    const whereClause = departmentId ? { departmentId: { id: departmentId } } : {};
+    const whereClause = departmentId
+      ? { departmentId: { id: departmentId } }
+      : {};
     return this.unitRepository.find({
       where: whereClause,
       relations: ['departmentId'],

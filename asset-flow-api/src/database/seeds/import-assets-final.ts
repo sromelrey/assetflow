@@ -40,37 +40,52 @@ async function importAssetsFinal() {
 
   for (let i = 0; i < results.length; i++) {
     const row = results[i];
-    
+
     try {
       // 1. Fetch relations established in Phase 2
       let catName = row['CATEGORY']?.trim() || 'UNCATEGORIZED';
-      if (catName.length > 50 || catName.includes(',') || /^\d+$/.test(catName)) catName = 'UNCATEGORIZED';
+      if (catName.length > 50 || catName.includes(',') || /^\d+$/.test(catName))
+        catName = 'UNCATEGORIZED';
       const category = await categoryRepo.findOneBy({ name: catName });
 
-      let unitName = row['UNIT']?.replace(/\t/g, '')?.replace(/"/g, '')?.trim() || 'N/A';
-      if (unitName.toUpperCase() === 'N/A' || unitName === '') unitName = 'UNALLOCATED';
+      let unitName =
+        row['UNIT']?.replace(/\t/g, '')?.replace(/"/g, '')?.trim() || 'N/A';
+      if (unitName.toUpperCase() === 'N/A' || unitName === '')
+        unitName = 'UNALLOCATED';
       // Just find the first unit matching the name (Phase 2 ensured they exist uniquely per department chain)
       const unit = await unitRepo.findOneBy({ name: unitName });
 
       // 2. Resolve Custodian
       const custodianName = row['CUSTODIAN']?.trim();
       let employee: Employee | null = null;
-      if (custodianName && custodianName.toLowerCase() !== 'n/a' && custodianName !== '') {
+      if (
+        custodianName &&
+        custodianName.toLowerCase() !== 'n/a' &&
+        custodianName !== ''
+      ) {
         const parts = custodianName.split(' ');
         const firstName = parts[0];
-        const lastName = parts.length > 1 ? parts.slice(1).join(' ') : 'Unknown';
-        
-        employee = await employeeRepo.createQueryBuilder('employee')
-          .where('employee.firstName ILIKE :firstName', { firstName: `%${firstName}%` })
-          .andWhere('employee.lastName ILIKE :lastName', { lastName: `%${lastName}%` })
+        const lastName =
+          parts.length > 1 ? parts.slice(1).join(' ') : 'Unknown';
+
+        employee = await employeeRepo
+          .createQueryBuilder('employee')
+          .where('employee.firstName ILIKE :firstName', {
+            firstName: `%${firstName}%`,
+          })
+          .andWhere('employee.lastName ILIKE :lastName', {
+            lastName: `%${lastName}%`,
+          })
           .getOne();
-          
+
         if (!employee) {
-          employee = await employeeRepo.save(employeeRepo.create({
-            firstName,
-            lastName,
-            status: 'active'
-          }));
+          employee = await employeeRepo.save(
+            employeeRepo.create({
+              firstName,
+              lastName,
+              status: 'active',
+            }),
+          );
         }
       }
 
@@ -78,7 +93,8 @@ async function importAssetsFinal() {
       const rawStatus = row['STATUS']?.trim()?.toUpperCase() || '';
       let status = AssetStatus.ACTIVE;
       if (rawStatus === 'DEPLOYED') status = AssetStatus.DEPLOYED;
-      else if (rawStatus === 'DECOMMISSIONED' || row['DATE DECOMMISSIONED']) status = AssetStatus.DECOMMISSIONED;
+      else if (rawStatus === 'DECOMMISSIONED' || row['DATE DECOMMISSIONED'])
+        status = AssetStatus.DECOMMISSIONED;
       else if (rawStatus.includes('REPAIR')) status = AssetStatus.FOR_REPAIR;
       else if (rawStatus.includes('STORAGE')) status = AssetStatus.IN_STORAGE;
 
@@ -92,10 +108,10 @@ async function importAssetsFinal() {
       // 5. Basic Asset Info
       const assetNo = row['IT ASSET NO']?.trim();
       if (!assetNo) {
-          errorCount++;
-          continue; // Cannot import without asset number based on our schema requirement
+        errorCount++;
+        continue; // Cannot import without asset number based on our schema requirement
       }
-      
+
       const serialNo = row['SERIAL NUMBER']?.trim() || null;
       const name = assetNo;
 
@@ -104,7 +120,7 @@ async function importAssetsFinal() {
         const newAsset = assetRepo.create();
         newAsset.name = name;
         newAsset.assetNo = assetNo;
-        newAsset.serialNo = (serialNo && serialNo !== '') ? serialNo : undefined;
+        newAsset.serialNo = serialNo && serialNo !== '' ? serialNo : undefined;
         newAsset.status = status;
         if (purchaseDate) newAsset.purchaseDate = purchaseDate;
         if (unit) newAsset.unit = unit;
@@ -117,7 +133,8 @@ async function importAssetsFinal() {
         updatedAv: row['UPDATED AV']?.trim(),
         rapid7: row['RAPID 7']?.trim(),
         lastPhysicalCountDate: row['LAST PHYSICAL COUNT DATE']?.trim(),
-        lastPhysicalCountCheckedBy: row['LAST PHYSICAL COUNT CHECKED BY']?.trim(),
+        lastPhysicalCountCheckedBy:
+          row['LAST PHYSICAL COUNT CHECKED BY']?.trim(),
         financeFixedAssetNo: row['FINANCE FIXED ASSET NO.']?.trim(),
         assetTaggedBy: row['ASSET TAGGED BY:']?.trim(),
         rawLocationTags: {
@@ -126,8 +143,8 @@ async function importAssetsFinal() {
           floor: row['FLOOR']?.trim(),
           division: row['DIVISION']?.trim(),
           department: row['DEPARTMENT']?.trim(),
-          unit: row['UNIT']?.trim()
-        }
+          unit: row['UNIT']?.trim(),
+        },
       };
 
       if (employee) {
@@ -135,17 +152,25 @@ async function importAssetsFinal() {
         metadata.custodianName = custodianName;
       }
 
-      let assetDetails = await assetDetailsRepo.findOneBy({ assetId: { id: asset.id } });
+      let assetDetails = await assetDetailsRepo.findOneBy({
+        assetId: { id: asset.id },
+      });
       if (!assetDetails) {
         const details = assetDetailsRepo.create();
         details.brand = row['BRAND']?.trim() || undefined;
         details.model = row['MODEL']?.trim() || undefined;
         details.ipAddress = row['IP ADDRESS']?.trim() || undefined;
         details.computerName = row['COMPUTER NAME']?.trim() || undefined;
-        details.operatingSystem = row['OPERATING SYSTEM (IF ANY)']?.trim() || row['OPERATING SYSTEM']?.trim() || undefined;
+        details.operatingSystem =
+          row['OPERATING SYSTEM (IF ANY)']?.trim() ||
+          row['OPERATING SYSTEM']?.trim() ||
+          undefined;
         details.processor = row['PROCESSOR']?.trim() || undefined;
         details.memory = row['MEMORY']?.trim() || undefined;
-        details.storage = row['STORAGE CAPACITY']?.trim() || row['STORAGE']?.trim() || undefined;
+        details.storage =
+          row['STORAGE CAPACITY']?.trim() ||
+          row['STORAGE']?.trim() ||
+          undefined;
         details.remarks = row['REMARKS']?.trim() || undefined;
         details.poNumber = row['P.O. NUMBER']?.trim() || undefined;
         details.imei = row['IMEI NO']?.trim() || undefined;
@@ -153,7 +178,7 @@ async function importAssetsFinal() {
         details.assetId = asset;
         await assetDetailsRepo.save(details);
       }
-      
+
       successCount++;
       if (successCount % 500 === 0) {
         console.log(`Imported ${successCount}/${results.length} assets...`);
@@ -167,7 +192,7 @@ async function importAssetsFinal() {
   console.log(`\n--- Phase 3 Complete ---`);
   console.log(`Successfully Imported Assets: ${successCount}`);
   console.log(`Skipped/Errors: ${errorCount}`);
-  
+
   await app.close();
   process.exit(0);
 }

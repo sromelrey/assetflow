@@ -13,11 +13,12 @@ import { HealthModule } from './modules/health/health.module';
 import { SiteModule } from './modules/site/site.module';
 import { UnitModule } from './modules/unit/unit.module';
 import { UserModule } from './modules/user/user.module';
+import { InventoryModule } from './modules/inventory/inventory.module';
 @Module({
   imports: [
     // Global config module
     ConfigModule.forRoot({ isGlobal: true }),
-    
+
     // Database configuration
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -30,7 +31,7 @@ import { UserModule } from './modules/user/user.module';
         ssl: false,
       }),
     }),
-    
+
     // Feature modules
     AuthModule,
     AssetModule,
@@ -44,6 +45,7 @@ import { UserModule } from './modules/user/user.module';
     SiteModule,
     UnitModule,
     UserModule,
+    InventoryModule,
   ],
 })
 export class AppModule {}

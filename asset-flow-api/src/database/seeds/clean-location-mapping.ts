@@ -7,12 +7,12 @@ const NOISE_PATTERNS = [
   /^WIN\s?\d+/i,
   /windows\s?\d+/i,
   /ANDROID/i,
-  /^FJC|^FGL|^FCW|^JFC/,   // serial numbers in site field
+  /^FJC|^FGL|^FCW|^JFC/, // serial numbers in site field
   /^[A-Z0-9]{8,},[A-Z0-9]+/, // comma-separated serial numbers
 ];
 
 function isNoise(value: string): boolean {
-  return NOISE_PATTERNS.some(pattern => pattern.test(value ?? ''));
+  return NOISE_PATTERNS.some((pattern) => pattern.test(value ?? ''));
 }
 
 async function cleanLocationMapping() {
@@ -34,14 +34,20 @@ async function cleanLocationMapping() {
 
   for (const row of results) {
     const fieldsToCheck = [
-      row['OriginalSite'], row['OriginalBuilding'], row['OriginalFloor'],
+      row['OriginalSite'],
+      row['OriginalBuilding'],
+      row['OriginalFloor'],
       row['OriginalUnit'],
-      row['CorrectedSite'], row['CorrectedBuilding'], row['CorrectedFloor'],
+      row['CorrectedSite'],
+      row['CorrectedBuilding'],
+      row['CorrectedFloor'],
       row['CorrectedUnit'],
     ];
 
     if (fieldsToCheck.some(isNoise)) {
-      console.log(`  REMOVING: ${row['OriginalSite']} -> ${row['OriginalBuilding']} -> ${row['OriginalUnit']}`);
+      console.log(
+        `  REMOVING: ${row['OriginalSite']} -> ${row['OriginalBuilding']} -> ${row['OriginalUnit']}`,
+      );
       removed++;
     } else {
       clean.push(row);
@@ -49,22 +55,35 @@ async function cleanLocationMapping() {
   }
 
   // Write back
-  const header = 'OriginalSite,OriginalBuilding,OriginalFloor,OriginalDivision,OriginalDepartment,OriginalUnit,CorrectedSite,CorrectedBuilding,CorrectedFloor,CorrectedDivision,CorrectedDepartment,CorrectedUnit\n';
+  const header =
+    'OriginalSite,OriginalBuilding,OriginalFloor,OriginalDivision,OriginalDepartment,OriginalUnit,CorrectedSite,CorrectedBuilding,CorrectedFloor,CorrectedDivision,CorrectedDepartment,CorrectedUnit\n';
   const writeStream = fs.createWriteStream(outputPath);
   writeStream.write(header);
 
   for (const row of clean) {
     const line = [
-      row['OriginalSite'], row['OriginalBuilding'], row['OriginalFloor'],
-      row['OriginalDivision'], row['OriginalDepartment'], row['OriginalUnit'],
-      row['CorrectedSite'], row['CorrectedBuilding'], row['CorrectedFloor'],
-      row['CorrectedDivision'], row['CorrectedDepartment'], row['CorrectedUnit'],
-    ].map(v => `"${(v ?? '').replace(/"/g, '""')}"`).join(',');
+      row['OriginalSite'],
+      row['OriginalBuilding'],
+      row['OriginalFloor'],
+      row['OriginalDivision'],
+      row['OriginalDepartment'],
+      row['OriginalUnit'],
+      row['CorrectedSite'],
+      row['CorrectedBuilding'],
+      row['CorrectedFloor'],
+      row['CorrectedDivision'],
+      row['CorrectedDepartment'],
+      row['CorrectedUnit'],
+    ]
+      .map((v) => `"${(v ?? '').replace(/"/g, '""')}"`)
+      .join(',');
     writeStream.write(line + '\n');
   }
   writeStream.end();
 
-  console.log(`\nDone! Removed ${removed} noisy rows. ${clean.length} clean rows remaining.`);
+  console.log(
+    `\nDone! Removed ${removed} noisy rows. ${clean.length} clean rows remaining.`,
+  );
 }
 
 cleanLocationMapping().catch(console.error);

@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { SiteService } from './site.service';
 import { CreateSiteDto } from './dto/create-site.dto';
@@ -12,7 +21,11 @@ export class SiteController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new site' })
-  @ApiResponse({ status: 201, description: 'Site created successfully.', type: Site })
+  @ApiResponse({
+    status: 201,
+    description: 'Site created successfully.',
+    type: Site,
+  })
   @ApiBody({ type: CreateSiteDto })
   create(@Body() createSiteDto: CreateSiteDto) {
     return this.siteService.create(createSiteDto);
@@ -38,7 +51,10 @@ export class SiteController {
   @ApiResponse({ status: 200, description: 'The updated site.', type: Site })
   @ApiResponse({ status: 404, description: 'Site not found.' })
   @ApiBody({ type: UpdateSiteDto })
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateSiteDto: UpdateSiteDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateSiteDto: UpdateSiteDto,
+  ) {
     return this.siteService.update(id, updateSiteDto);
   }
 

@@ -30,10 +30,10 @@ async function bootstrap() {
   const uniqueSites = new Set();
   const statusCounts: Record<string, number> = {};
 
-  results.forEach(row => {
+  results.forEach((row) => {
     const cat = row['CATEGORY'] || row['category'] || 'MISSING';
     uniqueCategories.add(cat);
-    
+
     const site = row['SITE ADDRESS'] || row['site address'] || 'MISSING';
     uniqueSites.add(site);
 
@@ -46,8 +46,11 @@ async function bootstrap() {
   console.log('Unique Categories Found:', uniqueCategories.size);
   console.log('Unique Sites Found:', uniqueSites.size);
   console.log('Status Breakdown:', statusCounts);
-  
-  console.log('\nFirst 10 Categories:', Array.from(uniqueCategories).slice(0, 10));
+
+  console.log(
+    '\nFirst 10 Categories:',
+    Array.from(uniqueCategories).slice(0, 10),
+  );
 }
 
 bootstrap().catch(console.error);

@@ -15,16 +15,20 @@ async function cleanupHierarchy() {
     'floor',
     'building',
     'site',
-    'category'
+    'category',
   ];
 
   for (const table of tables) {
     console.log(`Clearing table: ${table}`);
     // Using TRUNCATE with RESTART IDENTITY and CASCADE to reset IDs and handle dependencies
-    await dataSource.query(`TRUNCATE TABLE "${table}" RESTART IDENTITY CASCADE`);
+    await dataSource.query(
+      `TRUNCATE TABLE "${table}" RESTART IDENTITY CASCADE`,
+    );
   }
 
-  console.log('\nCleanup Complete! All hierarchy and category tables are empty.');
+  console.log(
+    '\nCleanup Complete! All hierarchy and category tables are empty.',
+  );
   await app.close();
   process.exit(0);
 }

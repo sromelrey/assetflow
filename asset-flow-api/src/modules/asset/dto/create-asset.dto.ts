@@ -1,5 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsInt, IsISO8601, IsNotEmpty, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
+import {
+  IsEnum,
+  IsInt,
+  IsISO8601,
+  IsNotEmpty,
+  IsObject,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { AssetStatus } from '@/types/enums';
 import { CreateAssetDetailsDto } from './create-asset-details.dto';
@@ -10,12 +19,18 @@ export class CreateAssetDto {
   @IsNotEmpty()
   name: string;
 
-  @ApiPropertyOptional({ example: 'SN123456789', description: 'Serial number of the asset' })
+  @ApiPropertyOptional({
+    example: 'SN123456789',
+    description: 'Serial number of the asset',
+  })
   @IsOptional()
   @IsString()
   serialNo?: string;
 
-  @ApiPropertyOptional({ example: 'AST-001', description: 'Unique asset identifier' })
+  @ApiPropertyOptional({
+    example: 'AST-001',
+    description: 'Unique asset identifier',
+  })
   @IsOptional()
   @IsString()
   assetNo?: string;
@@ -25,22 +40,35 @@ export class CreateAssetDto {
   @IsString()
   assetType?: string;
 
-  @ApiPropertyOptional({ example: '2023-01-01', description: 'Date of purchase' })
+  @ApiPropertyOptional({
+    example: '2023-01-01',
+    description: 'Date of purchase',
+  })
   @IsOptional()
   @IsISO8601()
   purchaseDate?: Date;
 
-  @ApiPropertyOptional({ enum: AssetStatus, default: AssetStatus.ACTIVE, description: 'Status of the asset' })
+  @ApiPropertyOptional({
+    enum: AssetStatus,
+    default: AssetStatus.ACTIVE,
+    description: 'Status of the asset',
+  })
   @IsOptional()
   @IsEnum(AssetStatus)
   status?: AssetStatus;
 
-  @ApiProperty({ example: 1, description: 'ID of the unit this asset belongs to' })
+  @ApiProperty({
+    example: 1,
+    description: 'ID of the unit this asset belongs to',
+  })
   @IsInt()
   @IsNotEmpty()
   unitId: number;
 
-  @ApiProperty({ example: 1, description: 'ID of the category this asset belongs to' })
+  @ApiProperty({
+    example: 1,
+    description: 'ID of the category this asset belongs to',
+  })
   @IsInt()
   @IsNotEmpty()
   categoryId: number;
@@ -51,4 +79,12 @@ export class CreateAssetDto {
   @ValidateNested()
   @Type(() => CreateAssetDetailsDto)
   details?: CreateAssetDetailsDto;
+
+  @ApiPropertyOptional({
+    example: 1,
+    description: 'ID of the inventory item this asset was created from',
+  })
+  @IsOptional()
+  @IsInt()
+  inventoryId?: number;
 }

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useLoginMutation } from '../../store/auth/authApiSlice';
 
 function LoginPage() {
@@ -27,10 +28,16 @@ function LoginPage() {
       <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-8 shadow-lg dark:bg-gray-800">
         <div className="text-center">
           <div className="flex justify-center mb-4">
-            <img src="/logo.png" alt="Chonghua Logo" className="h-16 w-auto" />
+            <Image
+              src="/logo.png"
+              alt="Chong Hua Logo"
+              width={64}
+              height={64}
+              className="h-16 w-auto"
+            />
           </div>
           <h2 className="mt-6 text-2xl font-extrabold text-gray-900 dark:text-white">
-            Chonghua Asset Management System
+            IT Management System
           </h2>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
             Sign in to your account

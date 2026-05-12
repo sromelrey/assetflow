@@ -1,5 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { AssetService } from './asset.service';
 import { CreateAssetDto } from './dto/create-asset.dto';
 import { UpdateAssetDto } from './dto/update-asset.dto';
@@ -19,7 +36,11 @@ export class AssetController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new asset' })
-  @ApiResponse({ status: 201, description: 'Asset created successfully.', type: Asset })
+  @ApiResponse({
+    status: 201,
+    description: 'Asset created successfully.',
+    type: Asset,
+  })
   @ApiBody({ type: CreateAssetDto })
   create(@Body() createAssetDto: CreateAssetDto) {
     return this.assetService.create(createAssetDto);
@@ -34,7 +55,11 @@ export class AssetController {
 
   @Get('metrics')
   @ApiOperation({ summary: 'Retrieve dashboard metrics for assets' })
-  @ApiResponse({ status: 200, description: 'Aggregated metrics for the dashboard.', type: AssetMetricsDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Aggregated metrics for the dashboard.',
+    type: AssetMetricsDto,
+  })
   getMetrics(@Query('siteId') siteId?: string) {
     return this.assetService.getMetrics(siteId ? Number(siteId) : undefined);
   }
@@ -60,7 +85,7 @@ export class AssetController {
   @ApiResponse({ status: 404, description: 'Asset not found.' })
   @ApiBody({ type: UpdateAssetDto })
   update(
-    @Param('id', ParseIntPipe) id: number, 
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateAssetDto: UpdateAssetDto,
     @CurrentUser() user: any,
   ) {
@@ -88,11 +113,15 @@ export class AssetController {
   @ApiResponse({ status: 404, description: 'Asset not found.' })
   @ApiBody({ type: UpdateAssetStatusDto })
   updateStatusByAssetNo(
-    @Param('assetNo') assetNo: string, 
+    @Param('assetNo') assetNo: string,
     @Body() updateStatusDto: UpdateAssetStatusDto,
     @CurrentUser() user: any,
   ) {
-    return this.assetService.updateStatusByAssetNo(assetNo, updateStatusDto, user.id);
+    return this.assetService.updateStatusByAssetNo(
+      assetNo,
+      updateStatusDto,
+      user.id,
+    );
   }
 
   @Get(':id/status-history')

@@ -23,6 +23,11 @@ export class User extends CommonEntity {
   @Column({ type: 'boolean', name: 'is_active', default: true })
   isActive: boolean;
 
-  @Column({ type: 'varchar', length: 500, name: 'refresh_token', nullable: true })
+  @Column({
+    type: 'varchar',
+    length: 500,
+    name: 'refresh_token',
+    nullable: true,
+  })
   refreshToken?: string;
 }

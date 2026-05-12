@@ -36,7 +36,9 @@ async function importHierarchyMapped() {
       .on('end', () => resolve(true));
   });
 
-  console.log(`Processing ${rows.length} unique location combinations from mapping...`);
+  console.log(
+    `Processing ${rows.length} unique location combinations from mapping...`,
+  );
 
   let created = 0;
   let skipped = 0;
@@ -45,12 +47,12 @@ async function importHierarchyMapped() {
     const row = rows[i];
 
     // Read from Corrected columns (what the user cleaned)
-    const siteName   = row['CorrectedSite']?.trim()       || 'UNALLOCATED';
-    const bldgName   = row['CorrectedBuilding']?.trim()   || 'UNALLOCATED';
-    const floorName  = row['CorrectedFloor']?.trim()      || 'UNALLOCATED';
-    const divName    = row['CorrectedDivision']?.trim()   || 'UNALLOCATED';
-    const deptName   = row['CorrectedDepartment']?.trim() || 'UNALLOCATED';
-    const unitName   = row['CorrectedUnit']?.trim()       || 'UNALLOCATED';
+    const siteName = row['CorrectedSite']?.trim() || 'UNALLOCATED';
+    const bldgName = row['CorrectedBuilding']?.trim() || 'UNALLOCATED';
+    const floorName = row['CorrectedFloor']?.trim() || 'UNALLOCATED';
+    const divName = row['CorrectedDivision']?.trim() || 'UNALLOCATED';
+    const deptName = row['CorrectedDepartment']?.trim() || 'UNALLOCATED';
+    const unitName = row['CorrectedUnit']?.trim() || 'UNALLOCATED';
 
     // Skip completely empty or obviously bad rows
     if (siteName === 'N/A' && bldgName === 'N/A' && unitName === 'N/A') {
@@ -60,23 +62,53 @@ async function importHierarchyMapped() {
 
     try {
       let site = await siteRepo.findOneBy({ name: siteName });
-      if (!site) site = await siteRepo.save(siteRepo.create({ name: siteName }));
+      if (!site)
+        site = await siteRepo.save(siteRepo.create({ name: siteName }));
 
-      let building = await buildingRepo.findOneBy({ name: bldgName, site: { id: site.id } });
-      if (!building) building = await buildingRepo.save(buildingRepo.create({ name: bldgName, site }));
+      let building = await buildingRepo.findOneBy({
+        name: bldgName,
+        site: { id: site.id },
+      });
+      if (!building)
+        building = await buildingRepo.save(
+          buildingRepo.create({ name: bldgName, site }),
+        );
 
-      let floor = await floorRepo.findOneBy({ floorNumber: floorName, building: { id: building.id } });
-      if (!floor) floor = await floorRepo.save(floorRepo.create({ floorNumber: floorName, building }));
+      let floor = await floorRepo.findOneBy({
+        floorNumber: floorName,
+        building: { id: building.id },
+      });
+      if (!floor)
+        floor = await floorRepo.save(
+          floorRepo.create({ floorNumber: floorName, building }),
+        );
 
-      let division = await divisionRepo.findOneBy({ name: divName, floor: { id: floor.id } });
-      if (!division) division = await divisionRepo.save(divisionRepo.create({ name: divName, floor, status: 'active' }));
+      let division = await divisionRepo.findOneBy({
+        name: divName,
+        floor: { id: floor.id },
+      });
+      if (!division)
+        division = await divisionRepo.save(
+          divisionRepo.create({ name: divName, floor, status: 'active' }),
+        );
 
-      let department = await departmentRepo.findOneBy({ name: deptName, divisionId: { id: division.id } });
-      if (!department) department = await departmentRepo.save(departmentRepo.create({ name: deptName, divisionId: division }));
+      let department = await departmentRepo.findOneBy({
+        name: deptName,
+        divisionId: { id: division.id },
+      });
+      if (!department)
+        department = await departmentRepo.save(
+          departmentRepo.create({ name: deptName, divisionId: division }),
+        );
 
-      let unit = await unitRepo.findOneBy({ name: unitName, departmentId: { id: department.id } });
+      let unit = await unitRepo.findOneBy({
+        name: unitName,
+        departmentId: { id: department.id },
+      });
       if (!unit) {
-        await unitRepo.save(unitRepo.create({ name: unitName, departmentId: department }));
+        await unitRepo.save(
+          unitRepo.create({ name: unitName, departmentId: department }),
+        );
         created++;
       }
 
@@ -100,9 +132,15 @@ async function importHierarchyMapped() {
   });
 
   const categoryNames = new Set<string>();
-  assetRows.forEach(r => {
+  assetRows.forEach((r) => {
     let cat = r['CATEGORY']?.trim();
-    if (cat && cat.length <= 100 && !cat.includes(',') && !/^\d+$/.test(cat) && cat.toUpperCase() !== 'N/A') {
+    if (
+      cat &&
+      cat.length <= 100 &&
+      !cat.includes(',') &&
+      !/^\d+$/.test(cat) &&
+      cat.toUpperCase() !== 'N/A'
+    ) {
       categoryNames.add(cat);
     }
   });

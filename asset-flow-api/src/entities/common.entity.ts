@@ -31,9 +31,17 @@ export abstract class CommonEntity extends BaseEntity {
   @Index()
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp without time zone', nullable: true })
+  @UpdateDateColumn({
+    name: 'updated_at',
+    type: 'timestamp without time zone',
+    nullable: true,
+  })
   updatedAt: Date;
 
-  @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp without time zone', nullable: true })
+  @DeleteDateColumn({
+    name: 'deleted_at',
+    type: 'timestamp without time zone',
+    nullable: true,
+  })
   deletedAt: Date;
 }

@@ -15,7 +15,9 @@ export function initKeepAlive(): void {
   const serviceUrl = process.env.SERVICE_URL;
 
   if (!serviceUrl) {
-    console.warn('[KeepAlive] SERVICE_URL is not set. Skipping keep-alive cron.');
+    console.warn(
+      '[KeepAlive] SERVICE_URL is not set. Skipping keep-alive cron.',
+    );
     return;
   }
 

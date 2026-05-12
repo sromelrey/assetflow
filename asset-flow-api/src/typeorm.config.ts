@@ -11,6 +11,8 @@ import { Employee } from './entities/employee.entity';
 import { Floor } from './entities/floor.entity';
 import { Site } from './entities/site.entity';
 import { Unit } from './entities/unit.entity';
+import { Inventory } from './entities/inventory.entity';
+import { InventoryLog } from './entities/inventory-log.entity';
 
 import { AssetDetails } from './entities/asset-details.entity';
 import { Department } from './entities/department.entity';
@@ -35,9 +37,11 @@ export default new DataSource({
     Floor,
     Site,
     Unit,
+    Inventory,
+    InventoryLog,
   ],
   migrations: ['src/database/migrations/*.ts'],
   ssl: {
-    rejectUnauthorized: false
+    rejectUnauthorized: false,
   },
 });

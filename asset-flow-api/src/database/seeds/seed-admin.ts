@@ -13,8 +13,8 @@ const AppDataSource = new DataSource({
   entities: [User],
   synchronize: true,
   ssl: {
-    rejectUnauthorized: false
-  }
+    rejectUnauthorized: false,
+  },
 });
 
 async function seed() {

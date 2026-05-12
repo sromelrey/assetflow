@@ -1,5 +1,21 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiQuery } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+  Query,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { BuildingService } from './building.service';
 import { CreateBuildingDto } from './dto/create-building.dto';
 import { UpdateBuildingDto } from './dto/update-building.dto';
@@ -12,7 +28,11 @@ export class BuildingController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new building' })
-  @ApiResponse({ status: 201, description: 'Building created successfully.', type: Building })
+  @ApiResponse({
+    status: 201,
+    description: 'Building created successfully.',
+    type: Building,
+  })
   @ApiBody({ type: CreateBuildingDto })
   create(@Body() createBuildingDto: CreateBuildingDto) {
     return this.buildingService.create(createBuildingDto);
@@ -20,8 +40,17 @@ export class BuildingController {
 
   @Get()
   @ApiOperation({ summary: 'Retrieve all buildings' })
-  @ApiResponse({ status: 200, description: 'List of buildings.', type: [Building] })
-  @ApiQuery({ name: 'siteId', required: false, type: Number, description: 'Filter by site ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of buildings.',
+    type: [Building],
+  })
+  @ApiQuery({
+    name: 'siteId',
+    required: false,
+    type: Number,
+    description: 'Filter by site ID',
+  })
   findAll(@Query('siteId') siteId?: string) {
     return this.buildingService.findAll(siteId ? parseInt(siteId) : undefined);
   }
@@ -36,10 +65,17 @@ export class BuildingController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update a building' })
-  @ApiResponse({ status: 200, description: 'The updated building.', type: Building })
+  @ApiResponse({
+    status: 200,
+    description: 'The updated building.',
+    type: Building,
+  })
   @ApiResponse({ status: 404, description: 'Building not found.' })
   @ApiBody({ type: UpdateBuildingDto })
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateBuildingDto: UpdateBuildingDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateBuildingDto: UpdateBuildingDto,
+  ) {
     return this.buildingService.update(id, updateBuildingDto);
   }
 

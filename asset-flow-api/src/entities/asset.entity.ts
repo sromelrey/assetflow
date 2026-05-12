@@ -1,10 +1,18 @@
-import { Entity, Column, ManyToOne, JoinColumn, Index, OneToOne } from 'typeorm';
+import {
+  Entity,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  Index,
+  OneToOne,
+} from 'typeorm';
 import { CommonEntity } from './common.entity';
 import { Unit } from './unit.entity';
 import { AssetStatus } from '@/types/enums';
 import { Category } from './category.entity';
 import { Employee } from './employee.entity';
 import { AssetDetails } from './asset-details.entity';
+import { Inventory } from './inventory.entity';
 
 @Entity({ name: 'asset' })
 export class Asset extends CommonEntity {
@@ -16,7 +24,7 @@ export class Asset extends CommonEntity {
   @Index({ unique: true })
   serialNo?: string;
 
-  @Column({type:'varchar', length: 100, unique: true, nullable: true})
+  @Column({ type: 'varchar', length: 100, unique: true, nullable: true })
   @Index()
   assetNo?: string;
 
@@ -44,6 +52,12 @@ export class Asset extends CommonEntity {
 
   @OneToOne(() => AssetDetails, (assetDetails) => assetDetails.assetId)
   assetDetails: AssetDetails;
+
+  // Link to Inventory item this asset was created from
+  @ManyToOne(() => Inventory, { nullable: true })
+  @JoinColumn({ name: 'inventory_id' })
+  @Index()
+  inventory: Inventory;
 
   // Link to Employee who created the asset
   @ManyToOne(() => Employee)

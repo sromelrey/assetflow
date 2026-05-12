@@ -6,10 +6,10 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useLogoutMutation } from '@/store/auth/authApiSlice';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { 
-  LayoutDashboard, 
-  Package, 
-  ChevronLeft, 
+import {
+  LayoutDashboard,
+  Package,
+  ChevronLeft,
   ChevronRight,
   Settings,
   MapPin,
@@ -19,7 +19,8 @@ import {
   LogOut,
   Users,
   History,
-  QrCode
+  QrCode,
+  Warehouse,
 } from 'lucide-react';
 
 interface NavItem {
@@ -39,6 +40,11 @@ const navItems: NavItem[] = [
     title: 'Assets',
     href: '/assets',
     icon: Package,
+  },
+  {
+    title: 'Inventory',
+    href: '/inventory',
+    icon: Warehouse,
   },
   {
     title: 'Status History',

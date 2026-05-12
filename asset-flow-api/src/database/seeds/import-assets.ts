@@ -21,7 +21,7 @@ async function bootstrap() {
   console.log('Starting Asset Import Process...');
   const app = await NestFactory.createApplicationContext(AppModule);
   const dataSource = app.get(DataSource);
-  
+
   if (!dataSource.isInitialized) {
     console.error('DataSource is not initialized!');
     process.exit(1);
@@ -31,7 +31,7 @@ async function bootstrap() {
   const assetDetailsRepo = dataSource.getRepository(AssetDetails);
   const categoryRepo = dataSource.getRepository(Category);
   const employeeRepo = dataSource.getRepository(Employee);
-  
+
   const siteRepo = dataSource.getRepository(Site);
   const buildingRepo = dataSource.getRepository(Building);
   const floorRepo = dataSource.getRepository(Floor);
@@ -43,7 +43,7 @@ async function bootstrap() {
   const csvPath = path.join(process.cwd(), '..', 'assets.csv');
 
   console.log(`Reading CSV from: ${csvPath}`);
-  
+
   if (!fs.existsSync(csvPath)) {
     console.error('assets.csv not found in the root directory!');
     process.exit(1);
@@ -83,27 +83,61 @@ async function bootstrap() {
       unitName = unitName || 'Unknown Unit';
 
       let site = await siteRepo.findOneBy({ name: siteName });
-      if (!site) site = await siteRepo.save(siteRepo.create({ name: siteName }));
+      if (!site)
+        site = await siteRepo.save(siteRepo.create({ name: siteName }));
 
-      let building = await buildingRepo.findOneBy({ name: bldgName, site: { id: site.id } });
-      if (!building) building = await buildingRepo.save(buildingRepo.create({ name: bldgName, site }));
+      let building = await buildingRepo.findOneBy({
+        name: bldgName,
+        site: { id: site.id },
+      });
+      if (!building)
+        building = await buildingRepo.save(
+          buildingRepo.create({ name: bldgName, site }),
+        );
 
-      let floor = await floorRepo.findOneBy({ floorNumber: floorName, building: { id: building.id } });
-      if (!floor) floor = await floorRepo.save(floorRepo.create({ floorNumber: floorName, building }));
+      let floor = await floorRepo.findOneBy({
+        floorNumber: floorName,
+        building: { id: building.id },
+      });
+      if (!floor)
+        floor = await floorRepo.save(
+          floorRepo.create({ floorNumber: floorName, building }),
+        );
 
-      let division = await divisionRepo.findOneBy({ name: divName, floor: { id: floor.id } });
-      if (!division) division = await divisionRepo.save(divisionRepo.create({ name: divName, floor, status: 'active' }));
+      let division = await divisionRepo.findOneBy({
+        name: divName,
+        floor: { id: floor.id },
+      });
+      if (!division)
+        division = await divisionRepo.save(
+          divisionRepo.create({ name: divName, floor, status: 'active' }),
+        );
 
-      let department = await departmentRepo.findOneBy({ name: deptName, divisionId: { id: division.id } });
-      if (!department) department = await departmentRepo.save(departmentRepo.create({ name: deptName, divisionId: division }));
+      let department = await departmentRepo.findOneBy({
+        name: deptName,
+        divisionId: { id: division.id },
+      });
+      if (!department)
+        department = await departmentRepo.save(
+          departmentRepo.create({ name: deptName, divisionId: division }),
+        );
 
-      let unit = await unitRepo.findOneBy({ name: unitName, departmentId: { id: department.id } });
-      if (!unit) unit = await unitRepo.save(unitRepo.create({ name: unitName, departmentId: department }));
+      let unit = await unitRepo.findOneBy({
+        name: unitName,
+        departmentId: { id: department.id },
+      });
+      if (!unit)
+        unit = await unitRepo.save(
+          unitRepo.create({ name: unitName, departmentId: department }),
+        );
 
       // 2. Resolve Category
       const catName = row['CATEGORY']?.trim() || 'Uncategorized';
       let category = await categoryRepo.findOneBy({ name: catName });
-      if (!category) category = await categoryRepo.save(categoryRepo.create({ name: catName }));
+      if (!category)
+        category = await categoryRepo.save(
+          categoryRepo.create({ name: catName }),
+        );
 
       // 3. Resolve Custodian (Employee)
       const custodianName = row['CUSTODIAN']?.trim();
@@ -112,19 +146,27 @@ async function bootstrap() {
         // Try fuzzy find by name parts
         const parts = custodianName.split(' ');
         const firstName = parts[0];
-        const lastName = parts.length > 1 ? parts.slice(1).join(' ') : 'Unknown';
-        
-        employee = await employeeRepo.createQueryBuilder('employee')
-          .where('employee.firstName ILIKE :firstName', { firstName: `%${firstName}%` })
-          .andWhere('employee.lastName ILIKE :lastName', { lastName: `%${lastName}%` })
+        const lastName =
+          parts.length > 1 ? parts.slice(1).join(' ') : 'Unknown';
+
+        employee = await employeeRepo
+          .createQueryBuilder('employee')
+          .where('employee.firstName ILIKE :firstName', {
+            firstName: `%${firstName}%`,
+          })
+          .andWhere('employee.lastName ILIKE :lastName', {
+            lastName: `%${lastName}%`,
+          })
           .getOne();
-          
+
         if (!employee) {
-          employee = await employeeRepo.save(employeeRepo.create({
-            firstName,
-            lastName,
-            status: 'active'
-          }));
+          employee = await employeeRepo.save(
+            employeeRepo.create({
+              firstName,
+              lastName,
+              status: 'active',
+            }),
+          );
         }
       }
 
@@ -132,7 +174,8 @@ async function bootstrap() {
       const rawStatus = row['STATUS']?.trim()?.toUpperCase() || '';
       let status = AssetStatus.ACTIVE;
       if (rawStatus === 'DEPLOYED') status = AssetStatus.DEPLOYED;
-      else if (rawStatus === 'DECOMMISSIONED' || row['DATE DECOMMISSIONED']) status = AssetStatus.DECOMMISSIONED;
+      else if (rawStatus === 'DECOMMISSIONED' || row['DATE DECOMMISSIONED'])
+        status = AssetStatus.DECOMMISSIONED;
       else if (rawStatus.includes('REPAIR')) status = AssetStatus.FOR_REPAIR;
       else if (rawStatus.includes('STORAGE')) status = AssetStatus.IN_STORAGE;
 
@@ -167,7 +210,8 @@ async function bootstrap() {
         updatedAv: row['UPDATED AV']?.trim(),
         rapid7: row['RAPID 7']?.trim(),
         lastPhysicalCountDate: row['LAST PHYSICAL COUNT DATE']?.trim(),
-        lastPhysicalCountCheckedBy: row['LAST PHYSICAL COUNT CHECKED BY']?.trim(),
+        lastPhysicalCountCheckedBy:
+          row['LAST PHYSICAL COUNT CHECKED BY']?.trim(),
         financeFixedAssetNo: row['FINANCE FIXED ASSET NO.']?.trim(),
         assetTaggedBy: row['ASSET TAGGED BY:']?.trim(),
         // Save the raw text hierarchy just to be safe
@@ -177,8 +221,8 @@ async function bootstrap() {
           floor: row['FLOOR'],
           division: row['DIVISION'],
           department: row['DEPARTMENT'],
-          unit: row['UNIT']
-        }
+          unit: row['UNIT'],
+        },
       };
 
       if (employee) {
@@ -186,14 +230,18 @@ async function bootstrap() {
         metadata.custodianName = custodianName;
       }
 
-      let assetDetails = await assetDetailsRepo.findOneBy({ assetId: { id: asset.id } });
+      let assetDetails = await assetDetailsRepo.findOneBy({
+        assetId: { id: asset.id },
+      });
       if (!assetDetails) {
         assetDetails = assetDetailsRepo.create({
           brand: row['BRAND']?.trim(),
           model: row['MODEL']?.trim(),
           ipAddress: row['IP ADDRESS']?.trim(),
           computerName: row['COMPUTER NAME']?.trim(),
-          operatingSystem: row['OPERATING SYSTEM (IF ANY)']?.trim() || row['OPERATING SYSTEM']?.trim(),
+          operatingSystem:
+            row['OPERATING SYSTEM (IF ANY)']?.trim() ||
+            row['OPERATING SYSTEM']?.trim(),
           processor: row['PROCESSOR']?.trim(),
           memory: row['MEMORY']?.trim(),
           storage: row['STORAGE CAPACITY']?.trim() || row['STORAGE']?.trim(),
@@ -205,7 +253,7 @@ async function bootstrap() {
         });
         await assetDetailsRepo.save(assetDetails);
       }
-      
+
       successCount++;
       if (successCount % 50 === 0) {
         console.log(`Processed ${successCount}/${results.length} rows...`);
@@ -219,7 +267,7 @@ async function bootstrap() {
   console.log(`\nImport Complete!`);
   console.log(`Success: ${successCount}`);
   console.log(`Errors: ${errorCount}`);
-  
+
   await app.close();
   process.exit(0);
 }

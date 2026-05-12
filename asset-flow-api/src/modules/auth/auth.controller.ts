@@ -7,7 +7,7 @@ import {
   Post,
   Req,
   UseGuards,
-  BadRequestException
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
 import { AuthService } from './providers/auth.service';
@@ -30,9 +30,9 @@ export class AuthController {
     if (!user) {
       throw new BadRequestException('Unable to authenticate user');
     }
-    
+
     const tokens = await this.authService.signTokens(user);
-    
+
     return {
       user: this.authService.buildUserResponse(user),
       ...tokens,
@@ -67,7 +67,7 @@ export class AuthController {
     if (!req.user) {
       return null;
     }
-    
+
     return { user: req.user };
   }
 }

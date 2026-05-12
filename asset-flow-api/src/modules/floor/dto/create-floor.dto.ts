@@ -7,7 +7,10 @@ export class CreateFloorDto {
   @IsNotEmpty()
   floorNumber: string;
 
-  @ApiProperty({ example: 1, description: 'ID of the building this floor belongs to' })
+  @ApiProperty({
+    example: 1,
+    description: 'ID of the building this floor belongs to',
+  })
   @IsInt()
   @IsNotEmpty()
   buildingId: number;

@@ -10,7 +10,8 @@ export class HealthController {
   @Get()
   @ApiOperation({
     summary: 'Health check',
-    description: 'Returns the current health status. Used for uptime monitoring and keep-alive pings.',
+    description:
+      'Returns the current health status. Used for uptime monitoring and keep-alive pings.',
   })
   @ApiResponse({
     status: 200,

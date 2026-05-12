@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -59,9 +58,20 @@ export function EditAssetModal({ asset, open, onOpenChange }: EditAssetModalProp
   const [supplier, setSupplier] = useState('');
   const [remarks, setRemarks] = useState('');
 
+  // Desktop Accessories
+  const [hasMouse, setHasMouse] = useState(true);
+  const [hasKeyboard, setHasKeyboard] = useState(true);
+  const [hasAntivirus, setHasAntivirus] = useState(true);
+
   const { data: units = [] } = useGetUnitsQuery();
   const { data: categories = [] } = useGetCategoriesQuery();
   const [updateAsset, { isLoading }] = useUpdateAssetMutation();
+
+  // Find Desktop category ID
+  const desktopCategoryId = useMemo(() => {
+    const desktopCategory = categories.find(cat => cat.name.toLowerCase() === 'desktop');
+    return desktopCategory ? desktopCategory.id.toString() : null;
+  }, [categories]);
 
   useEffect(() => {
     if (asset && open) {
@@ -87,16 +97,22 @@ export function EditAssetModal({ asset, open, onOpenChange }: EditAssetModalProp
       setProcessor(d?.processor || '');
       setMemory(d?.memory || '');
       setStorage(d?.storage || '');
-      
+
       setComputerName(d?.computerName || '');
       setIpAddress(d?.ipAddress || '');
       setMacAddress(d?.macAddress || '');
       setOperatingSystem(d?.operatingSystem || '');
-      
+
       setPoNumber(d?.poNumber || '');
       setInvoiceNumber(d?.invoiceNumber || '');
       setSupplier(d?.supplier || '');
       setRemarks(d?.remarks || '');
+
+      // Populate desktop accessories from metadata
+      const metadata = d?.metadata as { hasMouse?: boolean; hasKeyboard?: boolean; hasAntivirus?: boolean } | undefined;
+      setHasMouse(metadata?.hasMouse ?? true);
+      setHasKeyboard(metadata?.hasKeyboard ?? true);
+      setHasAntivirus(metadata?.hasAntivirus ?? true);
     }
   }, [asset, open]);
 
@@ -136,6 +152,11 @@ export function EditAssetModal({ asset, open, onOpenChange }: EditAssetModalProp
             invoiceNumber: invoiceNumber || undefined,
             supplier: supplier || undefined,
             remarks: remarks || undefined,
+            metadata: desktopCategoryId === categoryId ? {
+              hasMouse,
+              hasKeyboard,
+              hasAntivirus
+            } : undefined
           }
         }
       }).unwrap();
@@ -227,6 +248,40 @@ export function EditAssetModal({ asset, open, onOpenChange }: EditAssetModalProp
                   <Label htmlFor="edit-serialNo">Serial No</Label>
                   <Input id="edit-serialNo" value={serialNo} onChange={e => setSerialNo(e.target.value)} />
                 </div>
+                {categoryId === desktopCategoryId && (
+                  <div className="col-span-2 space-y-3 pt-4 border-t">
+                    <Label className="text-sm font-semibold">Desktop Accessories</Label>
+                    <div className="flex gap-6">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={hasMouse}
+                          onChange={(e) => setHasMouse(e.target.checked)}
+                          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                        />
+                        <span className="text-sm">Mouse</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={hasKeyboard}
+                          onChange={(e) => setHasKeyboard(e.target.checked)}
+                          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                        />
+                        <span className="text-sm">Keyboard</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={hasAntivirus}
+                          onChange={(e) => setHasAntivirus(e.target.checked)}
+                          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                        />
+                        <span className="text-sm">Antivirus</span>
+                      </label>
+                    </div>
+                  </div>
+                )}
               </div>
             </TabsContent>
             

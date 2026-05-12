@@ -19,7 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, Printer, QrCode, CheckSquare, Square, Search, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const APP_BASE_URL = 'https://assetflow-alpha.vercel.app';
+const APP_BASE_URL = process.env.NEXT_PUBLIC_APP_URL;
 
 const ASSET_STATUSES: AssetStatus[] = [
   'Active',

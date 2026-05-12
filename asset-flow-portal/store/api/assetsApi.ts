@@ -7,6 +7,12 @@ import { Category } from './categoriesApi';
 
 export type AssetStatus = 'Active' | 'Decommissioned' | 'Deployed' | 'For Repair' | 'For Deployment' | 'In Storage';
 
+export interface DesktopMetadata {
+  hasMouse?: boolean;
+  hasKeyboard?: boolean;
+  hasAntivirus?: boolean;
+}
+
 export interface AssetDetails {
   id: number;
   brand?: string;
@@ -26,6 +32,7 @@ export interface AssetDetails {
   manufacturingDate?: string;
   remarks?: string;
   assetId?: number; // Depending on frontend needs, might omit or keep
+  metadata?: Record<string, unknown> | DesktopMetadata;
 }
 
 export interface Asset {
@@ -52,10 +59,11 @@ export interface CreateAssetDto {
   status?: AssetStatus;
   unitId: number;
   categoryId: number;
+  inventoryId?: number;
   details?: Omit<AssetDetails, 'id' | 'assetId'>;
 }
 
-export interface UpdateAssetDto extends Partial<CreateAssetDto> {}
+export type UpdateAssetDto = Partial<CreateAssetDto>;
 
 export interface FindAssetsDto {
   limit?: number;
@@ -122,7 +130,7 @@ export const assetsApi = apiSlice.injectEndpoints({
         method: 'POST',
         body,
       }),
-      invalidatesTags: [{ type: 'Asset', id: 'LIST' }],
+      invalidatesTags: [{ type: 'Asset', id: 'LIST' }, 'Inventory'],
     }),
 
     updateAsset: builder.mutation<Asset, { id: number; data: UpdateAssetDto }>({

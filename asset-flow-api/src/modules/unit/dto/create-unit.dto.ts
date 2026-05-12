@@ -7,7 +7,10 @@ export class CreateUnitDto {
   @IsNotEmpty()
   name: string;
 
-  @ApiProperty({ example: 1, description: 'ID of the department this unit belongs to' })
+  @ApiProperty({
+    example: 1,
+    description: 'ID of the department this unit belongs to',
+  })
   @IsInt()
   @IsNotEmpty()
   departmentId: number;

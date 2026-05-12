@@ -23,7 +23,9 @@ async function bootstrap() {
   console.log('Units:', counts[4][0].count);
   console.log('Employees:', counts[5][0].count);
 
-  const sampleCategories = await dataSource.query('SELECT name FROM category LIMIT 5');
+  const sampleCategories = await dataSource.query(
+    'SELECT name FROM category LIMIT 5',
+  );
   console.log('Sample Categories:', sampleCategories);
 
   const sampleAssets = await dataSource.query('SELECT name FROM asset LIMIT 5');
@@ -32,7 +34,7 @@ async function bootstrap() {
   await app.close();
 }
 
-bootstrap().catch(err => {
+bootstrap().catch((err) => {
   console.error('Check script failed:', err);
   process.exit(1);
 });

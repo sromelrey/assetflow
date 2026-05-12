@@ -4,10 +4,10 @@ import { ConfigService } from '@nestjs/config';
 
 export function applyMiddlewares(app: INestApplication<any>) {
   const configService = app.get(ConfigService);
-  
+
   // Security headers
   app.use(helmet());
-  
+
   // CORS for frontend
   const corsOrigin = configService.get<string>('CORS_ORIGIN');
   const allowedOrigins = [

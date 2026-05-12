@@ -1,5 +1,21 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { EmployeeService } from './employee.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
@@ -15,7 +31,11 @@ export class EmployeeController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new employee' })
-  @ApiResponse({ status: 201, description: 'Employee created successfully.', type: Employee })
+  @ApiResponse({
+    status: 201,
+    description: 'Employee created successfully.',
+    type: Employee,
+  })
   @ApiResponse({ status: 400, description: 'Invalid input data.' })
   @ApiBody({ type: CreateEmployeeDto })
   create(@Body() createEmployeeDto: CreateEmployeeDto) {
@@ -25,7 +45,11 @@ export class EmployeeController {
 
   @Get()
   @ApiOperation({ summary: 'Retrieve all employees' })
-  @ApiResponse({ status: 200, description: 'List of employees.', type: [Employee] })
+  @ApiResponse({
+    status: 200,
+    description: 'List of employees.',
+    type: [Employee],
+  })
   findAll() {
     return this.employeeService.findAll();
   }
@@ -40,10 +64,17 @@ export class EmployeeController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update an employee' })
-  @ApiResponse({ status: 200, description: 'The updated employee.', type: Employee })
+  @ApiResponse({
+    status: 200,
+    description: 'The updated employee.',
+    type: Employee,
+  })
   @ApiResponse({ status: 404, description: 'Employee not found.' })
   @ApiBody({ type: UpdateEmployeeDto })
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateEmployeeDto: UpdateEmployeeDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateEmployeeDto: UpdateEmployeeDto,
+  ) {
     return this.employeeService.update(id, updateEmployeeDto);
   }
 

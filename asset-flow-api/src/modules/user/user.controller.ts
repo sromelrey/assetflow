@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -13,7 +22,11 @@ export class UserController {
 
   @Post('upgrade/:employeeId')
   @ApiOperation({ summary: 'Upgrade an employee to a user' })
-  @ApiResponse({ status: 201, description: 'Employee upgraded to user successfully.', type: User })
+  @ApiResponse({
+    status: 201,
+    description: 'Employee upgraded to user successfully.',
+    type: User,
+  })
   @ApiResponse({ status: 404, description: 'Employee not found.' })
   upgrade(
     @Param('employeeId', ParseIntPipe) employeeId: number,
@@ -24,7 +37,11 @@ export class UserController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new user' })
-  @ApiResponse({ status: 201, description: 'User created successfully.', type: User })
+  @ApiResponse({
+    status: 201,
+    description: 'User created successfully.',
+    type: User,
+  })
   @ApiBody({ type: CreateUserDto })
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
@@ -50,7 +67,10 @@ export class UserController {
   @ApiResponse({ status: 200, description: 'The updated user.', type: User })
   @ApiResponse({ status: 404, description: 'User not found.' })
   @ApiBody({ type: UpdateUserDto })
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateUserDto: UpdateUserDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
     return this.userService.update(id, updateUserDto);
   }
 

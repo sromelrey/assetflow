@@ -17,7 +17,7 @@ async function normalizeCSV() {
   const fileStream = fs.createReadStream(inputPath);
   const rl = readline.createInterface({
     input: fileStream,
-    crlfDelay: Infinity
+    crlfDelay: Infinity,
   });
 
   const writeStream = fs.createWriteStream(outputPath);
@@ -28,7 +28,11 @@ async function normalizeCSV() {
 
     // Step 1: The original file wraps each entire CSV row in outer double-quotes.
     // Remove those outer quotes so the internal content is exposed.
-    if (cleanLine.startsWith('"') && cleanLine.endsWith('"') && cleanLine.length > 1) {
+    if (
+      cleanLine.startsWith('"') &&
+      cleanLine.endsWith('"') &&
+      cleanLine.length > 1
+    ) {
       cleanLine = cleanLine.substring(1, cleanLine.length - 1);
     }
 
@@ -48,7 +52,9 @@ async function normalizeCSV() {
   }
 
   writeStream.end();
-  console.log(`\nNormalization Complete! ${lineCount} lines written to assets-clean.csv`);
+  console.log(
+    `\nNormalization Complete! ${lineCount} lines written to assets-clean.csv`,
+  );
 }
 
 normalizeCSV().catch(console.error);

@@ -122,7 +122,7 @@ export function AssetDetailView({ asset }: AssetDetailViewProps) {
   const [isQrOpen, setIsQrOpen] = useState(false);
   const [updateStatus, { isLoading: isUpdating }] = useUpdateAssetStatusByNoMutation();
 
-  const APP_BASE_URL = 'https://assetflow-alpha.vercel.app';
+  const APP_BASE_URL = process.env.NEXT_PUBLIC_APP_URL;
   const qrUrl = `${APP_BASE_URL}/assets/${asset.id}`;
 
   const details = asset.assetDetails;

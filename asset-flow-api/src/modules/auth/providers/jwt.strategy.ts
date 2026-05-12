@@ -17,7 +17,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
     private readonly configService: ConfigService,
     @InjectRepository(User)
-    private readonly userRepo: Repository<User>
+    private readonly userRepo: Repository<User>,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -27,8 +27,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload: JwtPayload): Promise<any> {
-    const user = await this.userRepo.findOne({ 
-      where: { id: payload.sub, deletedAt: undefined } 
+    const user = await this.userRepo.findOne({
+      where: { id: payload.sub, deletedAt: undefined },
     });
 
     if (!user) {

@@ -43,7 +43,7 @@ export class BuildingService {
   async update(id: number, updateBuildingDto: UpdateBuildingDto) {
     const { siteId, ...rest } = updateBuildingDto;
     const updateData: any = { ...rest };
-    
+
     if (siteId) {
       updateData.site = { id: siteId };
     }

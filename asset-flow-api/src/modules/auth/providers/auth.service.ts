@@ -23,12 +23,12 @@ export class AuthService {
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<User | null> {
     const user = await this.userRepo.findOne({ where: { email } });
-    
+
     if (!user) {
       return null;
     }
@@ -38,7 +38,7 @@ export class AuthService {
     }
 
     const isPasswordValid = await argon2.verify(user.password, password);
-    
+
     if (!isPasswordValid) {
       return null;
     }
@@ -56,11 +56,17 @@ export class AuthService {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
         secret: this.configService.getOrThrow<string>('JWT_ACCESS_SECRET'),
-        expiresIn: this.configService.get<string>('JWT_ACCESS_EXPIRES_IN', '15m') as any,
+        expiresIn: this.configService.get<string>(
+          'JWT_ACCESS_EXPIRES_IN',
+          '15m',
+        ) as any,
       }),
       this.jwtService.signAsync(payload, {
         secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
-        expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN', '7d') as any,
+        expiresIn: this.configService.get<string>(
+          'JWT_REFRESH_EXPIRES_IN',
+          '7d',
+        ) as any,
       }),
     ]);
 
@@ -73,18 +79,26 @@ export class AuthService {
 
   async refreshTokens(refreshToken: string): Promise<Tokens> {
     try {
-      const payload = await this.jwtService.verifyAsync<TokenPayload>(refreshToken, {
-        secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
-      });
+      const payload = await this.jwtService.verifyAsync<TokenPayload>(
+        refreshToken,
+        {
+          secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
+        },
+      );
 
-      const user = await this.userRepo.findOne({ where: { id: parseInt(payload.sub) } });
+      const user = await this.userRepo.findOne({
+        where: { id: parseInt(payload.sub) },
+      });
 
       if (!user || !user.refreshToken) {
         throw new UnauthorizedException('Invalid refresh token');
       }
 
-      const isRefreshTokenValid = await argon2.verify(user.refreshToken, refreshToken);
-      
+      const isRefreshTokenValid = await argon2.verify(
+        user.refreshToken,
+        refreshToken,
+      );
+
       if (!isRefreshTokenValid) {
         throw new UnauthorizedException('Invalid refresh token');
       }

@@ -1,5 +1,21 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiQuery } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+  Query,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { FloorService } from './floor.service';
 import { CreateFloorDto } from './dto/create-floor.dto';
 import { UpdateFloorDto } from './dto/update-floor.dto';
@@ -12,7 +28,11 @@ export class FloorController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new floor' })
-  @ApiResponse({ status: 201, description: 'Floor created successfully.', type: Floor })
+  @ApiResponse({
+    status: 201,
+    description: 'Floor created successfully.',
+    type: Floor,
+  })
   @ApiBody({ type: CreateFloorDto })
   create(@Body() createFloorDto: CreateFloorDto) {
     return this.floorService.create(createFloorDto);
@@ -21,9 +41,16 @@ export class FloorController {
   @Get()
   @ApiOperation({ summary: 'Retrieve all floors' })
   @ApiResponse({ status: 200, description: 'List of floors.', type: [Floor] })
-  @ApiQuery({ name: 'buildingId', required: false, type: Number, description: 'Filter by building ID' })
+  @ApiQuery({
+    name: 'buildingId',
+    required: false,
+    type: Number,
+    description: 'Filter by building ID',
+  })
   findAll(@Query('buildingId') buildingId?: string) {
-    return this.floorService.findAll(buildingId ? parseInt(buildingId) : undefined);
+    return this.floorService.findAll(
+      buildingId ? parseInt(buildingId) : undefined,
+    );
   }
 
   @Get(':id')
@@ -39,7 +66,10 @@ export class FloorController {
   @ApiResponse({ status: 200, description: 'The updated floor.', type: Floor })
   @ApiResponse({ status: 404, description: 'Floor not found.' })
   @ApiBody({ type: UpdateFloorDto })
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateFloorDto: UpdateFloorDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateFloorDto: UpdateFloorDto,
+  ) {
     return this.floorService.update(id, updateFloorDto);
   }
 

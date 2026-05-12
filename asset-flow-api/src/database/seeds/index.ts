@@ -8,7 +8,9 @@ export const seeders = [
     run: async (dataSource: DataSource) => {
       const userRepository = dataSource.getRepository(User);
       const adminEmail = 'admin@assetflow.com';
-      const existingUser = await userRepository.findOneBy({ email: adminEmail });
+      const existingUser = await userRepository.findOneBy({
+        email: adminEmail,
+      });
 
       if (existingUser) {
         console.log('  Admin user already exists.');

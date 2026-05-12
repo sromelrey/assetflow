@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -22,12 +21,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCreateAssetMutation, AssetStatus } from '@/store/api/assetsApi';
 import { useGetUnitsQuery } from '@/store/api/organizationApi';
 import { useGetCategoriesQuery } from '@/store/api/categoriesApi';
-import { Plus } from 'lucide-react';
+import { useGetInventoryQuery, Inventory } from '@/store/api/inventoryApi';
+import { Plus, Package, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function AddAssetModal() {
   const [open, setOpen] = useState(false);
-  
+
+  // Inventory selection
+  const [selectedInventoryId, setSelectedInventoryId] = useState<string>('');
+  const [selectedInventory, setSelectedInventory] = useState<Inventory | null>(null);
+
   // Core Information
   const [name, setName] = useState('');
   const [categoryId, setCategoryId] = useState<string>('');
@@ -57,9 +61,42 @@ export function AddAssetModal() {
   const [supplier, setSupplier] = useState('');
   const [remarks, setRemarks] = useState('');
 
+  // Desktop Accessories
+  const [hasMouse, setHasMouse] = useState(true);
+  const [hasKeyboard, setHasKeyboard] = useState(true);
+  const [hasAntivirus, setHasAntivirus] = useState(true);
+
   const { data: units = [] } = useGetUnitsQuery();
   const { data: categories = [] } = useGetCategoriesQuery();
+  const { data: inventory = [] } = useGetInventoryQuery();
   const [createAsset, { isLoading }] = useCreateAssetMutation();
+
+  // Handle inventory selection
+  const handleInventoryChange = (value: string) => {
+    setSelectedInventoryId(value);
+    if (value && value !== 'none') {
+      const selectedItem = inventory.find((item) => item.id === parseInt(value, 10));
+      if (selectedItem) {
+        setSelectedInventory(selectedItem);
+        // Auto-populate fields from inventory
+        setName(selectedItem.name);
+        if (selectedItem.category) {
+          setCategoryId(selectedItem.category.id.toString());
+        }
+        if (selectedItem.unit) {
+          setUnitId(selectedItem.unit.id.toString());
+        }
+      }
+    } else {
+      setSelectedInventory(null);
+    }
+  };
+
+  // Find Desktop category ID
+  const desktopCategoryId = useMemo(() => {
+    const desktopCategory = categories.find(cat => cat.name.toLowerCase() === 'desktop');
+    return desktopCategory ? desktopCategory.id.toString() : null;
+  }, [categories]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,6 +116,7 @@ export function AddAssetModal() {
         status,
         unitId: parseInt(unitId, 10),
         categoryId: parseInt(categoryId, 10),
+        inventoryId: selectedInventoryId ? parseInt(selectedInventoryId, 10) : undefined,
         details: {
           brand: brand || undefined,
           model: model || undefined,
@@ -93,6 +131,11 @@ export function AddAssetModal() {
           invoiceNumber: invoiceNumber || undefined,
           supplier: supplier || undefined,
           remarks: remarks || undefined,
+          metadata: desktopCategoryId === categoryId ? {
+            hasMouse,
+            hasKeyboard,
+            hasAntivirus
+          } : undefined
         }
       }).unwrap();
 
@@ -105,6 +148,8 @@ export function AddAssetModal() {
   };
 
   const resetForm = () => {
+    setSelectedInventoryId('none');
+    setSelectedInventory(null);
     setName('');
     setCategoryId('');
     setUnitId('');
@@ -126,6 +171,9 @@ export function AddAssetModal() {
     setInvoiceNumber('');
     setSupplier('');
     setRemarks('');
+    setHasMouse(true);
+    setHasKeyboard(true);
+    setHasAntivirus(true);
   };
 
   return (
@@ -143,7 +191,7 @@ export function AddAssetModal() {
         <DialogHeader>
           <DialogTitle>Add New Asset</DialogTitle>
           <DialogDescription>
-            Enter the comprehensive details of the new asset below. Click save when you're done.
+            Enter the comprehensive details of the new asset below. Click save when you&apos;re done.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex-1 overflow-auto flex flex-col gap-4 py-4 pr-4 pl-1">
@@ -156,10 +204,48 @@ export function AddAssetModal() {
             </TabsList>
             
             <TabsContent value="core" className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="inventory">Select from Inventory (Optional)</Label>
+                <Select value={selectedInventoryId} onValueChange={handleInventoryChange}>
+                  <SelectTrigger id="inventory">
+                    <SelectValue placeholder="Select inventory item to auto-fill details" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    {inventory.filter((item) => item.quantity > 0).map((item) => (
+                      <SelectItem key={item.id} value={item.id.toString()}>
+                        {item.sku} - {item.name} (Stock: {item.quantity})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {selectedInventory && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Package className="h-4 w-4" />
+                    <span>Selected: {selectedInventory.sku} - {selectedInventory.name}</span>
+                    {selectedInventory.quantity <= selectedInventory.minStockLevel && (
+                      <span className="flex items-center gap-1 text-amber-600">
+                        <AlertCircle className="h-4 w-4" />
+                        Low stock warning
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Name *</Label>
-                  <Input id="name" value={name} onChange={e => setName(e.target.value)} required placeholder="e.g. Dell XPS 15" />
+                  <Input
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    placeholder="e.g. Dell XPS 15"
+                    disabled={!!selectedInventory}
+                  />
+                  {selectedInventory && (
+                    <p className="text-xs text-muted-foreground">Auto-filled from inventory</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="status">Status</Label>
@@ -217,6 +303,40 @@ export function AddAssetModal() {
                   <Label htmlFor="serialNo">Serial No</Label>
                   <Input id="serialNo" value={serialNo} onChange={e => setSerialNo(e.target.value)} />
                 </div>
+                {categoryId === desktopCategoryId && (
+                  <div className="col-span-2 space-y-3 pt-4 border-t">
+                    <Label className="text-sm font-semibold">Desktop Accessories</Label>
+                    <div className="flex gap-6">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={hasMouse}
+                          onChange={(e) => setHasMouse(e.target.checked)}
+                          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                        />
+                        <span className="text-sm">Mouse</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={hasKeyboard}
+                          onChange={(e) => setHasKeyboard(e.target.checked)}
+                          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                        />
+                        <span className="text-sm">Keyboard</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={hasAntivirus}
+                          onChange={(e) => setHasAntivirus(e.target.checked)}
+                          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                        />
+                        <span className="text-sm">Antivirus</span>
+                      </label>
+                    </div>
+                  </div>
+                )}
               </div>
             </TabsContent>
             

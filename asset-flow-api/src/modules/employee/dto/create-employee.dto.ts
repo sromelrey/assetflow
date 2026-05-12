@@ -1,5 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsEmail, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsDateString,
+  IsEmail,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateEmployeeDto {
   @ApiProperty({ example: 'John', description: 'First name of the employee' })
@@ -7,7 +14,10 @@ export class CreateEmployeeDto {
   @IsNotEmpty()
   firstName: string;
 
-  @ApiPropertyOptional({ example: 'Doe', description: 'Middle name of the employee' })
+  @ApiPropertyOptional({
+    example: 'Doe',
+    description: 'Middle name of the employee',
+  })
   @IsOptional()
   @IsString()
   middleName?: string;
@@ -17,7 +27,10 @@ export class CreateEmployeeDto {
   @IsNotEmpty()
   lastName: string;
 
-  @ApiPropertyOptional({ example: 'john.smith@example.com', description: 'Email address' })
+  @ApiPropertyOptional({
+    example: 'john.smith@example.com',
+    description: 'Email address',
+  })
   @IsOptional()
   @IsEmail()
   email?: string;
@@ -27,12 +40,18 @@ export class CreateEmployeeDto {
   @IsString()
   phone?: string;
 
-  @ApiPropertyOptional({ example: 'Software Engineer', description: 'Job position' })
+  @ApiPropertyOptional({
+    example: 'Software Engineer',
+    description: 'Job position',
+  })
   @IsOptional()
   @IsString()
   position?: string;
 
-  @ApiPropertyOptional({ example: 'active', description: 'Status of the employee' })
+  @ApiPropertyOptional({
+    example: 'active',
+    description: 'Status of the employee',
+  })
   @IsOptional()
   @IsString()
   status?: string;
@@ -42,7 +61,10 @@ export class CreateEmployeeDto {
   @IsDateString()
   dateHired?: Date;
 
-  @ApiPropertyOptional({ example: 'Full-Time', description: 'Type of employment' })
+  @ApiPropertyOptional({
+    example: 'Full-Time',
+    description: 'Type of employment',
+  })
   @IsOptional()
   @IsString()
   employmentType?: string;

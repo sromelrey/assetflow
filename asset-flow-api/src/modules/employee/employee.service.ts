@@ -17,7 +17,7 @@ export class EmployeeService {
 
   /**
    * Creates a new employee record.
-   * 
+   *
    * @param createEmployeeDto - The employee data
    * @returns The created Employee entity
    */
@@ -28,7 +28,7 @@ export class EmployeeService {
 
   /**
    * Retrieves all employee records.
-   * 
+   *
    * @returns List of Employee entities
    */
   findAll() {
@@ -37,7 +37,7 @@ export class EmployeeService {
 
   /**
    * Retrieves a specific employee record by ID.
-   * 
+   *
    * @param id - The ID of the employee
    * @returns The Employee entity
    * @throws {NotFoundException} If employee not found
@@ -54,7 +54,7 @@ export class EmployeeService {
 
   /**
    * Updates an existing employee record.
-   * 
+   *
    * @param id - The ID of the employee to update
    * @param updateEmployeeDto - The updated employee data
    * @returns The updated Employee entity
@@ -66,7 +66,7 @@ export class EmployeeService {
       id,
       ...updateEmployeeDto,
     });
-    
+
     if (!updated) {
       throw new NotFoundException(`Employee with ID ${id} not found`);
     }
@@ -76,7 +76,7 @@ export class EmployeeService {
 
   /**
    * Removes an employee record (soft-delete recommended but using delete for now to match repository pattern if delete is used elsewhere).
-   * 
+   *
    * @param id - The ID of the employee to remove
    * @returns A success message
    * @throws {NotFoundException} If employee not found

@@ -1,4 +1,11 @@
-import { Entity, Column, ManyToOne, OneToMany, JoinColumn, Index } from 'typeorm';
+import {
+  Entity,
+  Column,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
+  Index,
+} from 'typeorm';
 import { CommonEntity } from './common.entity';
 import { Site } from './site.entity';
 import { Floor } from './floor.entity';

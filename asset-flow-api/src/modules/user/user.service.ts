@@ -53,17 +53,21 @@ export class UserService {
   }
 
   async upgradeEmployee(employeeId: number, upgradeDto: UserUpgradeDto) {
-    const employee = await this.employeeRepository.findOne({ where: { id: employeeId } });
+    const employee = await this.employeeRepository.findOne({
+      where: { id: employeeId },
+    });
     if (!employee) {
       throw new NotFoundException(`Employee with ID ${employeeId} not found`);
     }
 
-    const existingUser = await this.userRepository.findOne({ where: { email: employee.email } });
+    const existingUser = await this.userRepository.findOne({
+      where: { email: employee.email },
+    });
     if (existingUser) {
       throw new Error(`User with email ${employee.email} already exists`);
     }
 
-    const temporaryPassword = "Password123!";
+    const temporaryPassword = 'Password123!';
     const hashedPassword = await argon2.hash(temporaryPassword);
 
     const user = this.userRepository.create({

@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -12,7 +21,11 @@ export class CategoryController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new category' })
-  @ApiResponse({ status: 201, description: 'Category created successfully.', type: Category })
+  @ApiResponse({
+    status: 201,
+    description: 'Category created successfully.',
+    type: Category,
+  })
   @ApiBody({ type: CreateCategoryDto })
   create(@Body() createCategoryDto: CreateCategoryDto) {
     return this.categoryService.create(createCategoryDto);
@@ -20,7 +33,11 @@ export class CategoryController {
 
   @Get()
   @ApiOperation({ summary: 'Retrieve all categories' })
-  @ApiResponse({ status: 200, description: 'List of categories.', type: [Category] })
+  @ApiResponse({
+    status: 200,
+    description: 'List of categories.',
+    type: [Category],
+  })
   findAll() {
     return this.categoryService.findAll();
   }
@@ -35,10 +52,17 @@ export class CategoryController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update a category' })
-  @ApiResponse({ status: 200, description: 'The updated category.', type: Category })
+  @ApiResponse({
+    status: 200,
+    description: 'The updated category.',
+    type: Category,
+  })
   @ApiResponse({ status: 404, description: 'Category not found.' })
   @ApiBody({ type: UpdateCategoryDto })
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateCategoryDto: UpdateCategoryDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateCategoryDto: UpdateCategoryDto,
+  ) {
     return this.categoryService.update(id, updateCategoryDto);
   }
 

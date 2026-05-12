@@ -3,26 +3,38 @@ import { IsInt, IsOptional, IsString, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class FindAssetsDto {
-  @ApiPropertyOptional({ example: 20, description: 'Number of items to return per page' })
+  @ApiPropertyOptional({
+    example: 20,
+    description: 'Number of items to return per page',
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
   limit?: number = 20;
 
-  @ApiPropertyOptional({ example: 0, description: 'Last seen asset ID for cursor-based pagination' })
+  @ApiPropertyOptional({
+    example: 0,
+    description: 'Last seen asset ID for cursor-based pagination',
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(0)
   cursor?: number;
 
-  @ApiPropertyOptional({ example: 'Dell Laptop', description: 'Search by asset name or asset number (case-insensitive)' })
+  @ApiPropertyOptional({
+    example: 'Dell Laptop',
+    description: 'Search by asset name or asset number (case-insensitive)',
+  })
   @IsOptional()
   @IsString()
   search?: string;
 
-  @ApiPropertyOptional({ example: 'DEPLOYED', description: 'Filter by asset status' })
+  @ApiPropertyOptional({
+    example: 'DEPLOYED',
+    description: 'Filter by asset status',
+  })
   @IsOptional()
   @IsString()
   status?: string;

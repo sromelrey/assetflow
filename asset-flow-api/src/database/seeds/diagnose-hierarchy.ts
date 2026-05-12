@@ -18,13 +18,15 @@ async function analyzeHierarchy() {
       .on('end', () => resolve(true));
   });
 
-  console.log(`Analyzing ${results.length} rows for hierarchy combinations...\n`);
+  console.log(
+    `Analyzing ${results.length} rows for hierarchy combinations...\n`,
+  );
 
   const sites = new Set();
   const buildings = new Set();
   const combinations = new Map();
 
-  results.forEach(row => {
+  results.forEach((row) => {
     const site = row['SITE ADDRESS']?.trim() || 'BLANK';
     const bldg = row['BLDG. LOCATION']?.trim() || 'BLANK';
     const floor = row['FLOOR']?.trim() || 'BLANK';
@@ -39,18 +41,26 @@ async function analyzeHierarchy() {
   console.log('--- UNIQUE SITES ---');
   console.log(Array.from(sites));
 
-  console.log('\n--- TOP 20 HIERARCHY COMBINATIONS (Site -> Bldg -> Floor) ---');
+  console.log(
+    '\n--- TOP 20 HIERARCHY COMBINATIONS (Site -> Bldg -> Floor) ---',
+  );
   const sorted = Array.from(combinations.entries())
     .sort((a, b) => b[1] - a[1])
     .slice(0, 20);
-    
+
   sorted.forEach(([comb, count]) => {
     console.log(`${comb}: ${count} assets`);
   });
 
   console.log('\n--- BLANK CHECK ---');
-  console.log('Rows with BLANK Site:', results.filter(r => !r['SITE ADDRESS']?.trim()).length);
-  console.log('Rows with BLANK Building:', results.filter(r => !r['BLDG. LOCATION']?.trim()).length);
+  console.log(
+    'Rows with BLANK Site:',
+    results.filter((r) => !r['SITE ADDRESS']?.trim()).length,
+  );
+  console.log(
+    'Rows with BLANK Building:',
+    results.filter((r) => !r['BLDG. LOCATION']?.trim()).length,
+  );
 }
 
 analyzeHierarchy().catch(console.error);

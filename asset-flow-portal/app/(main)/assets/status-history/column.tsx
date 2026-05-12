@@ -15,6 +15,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 export const columns: ColumnDef<AssetStatusLog>[] = [
   {
+    id: 'asset.name',
     header: 'Asset Name',
     accessorKey: 'asset.name',
     cell: ({ row }) => {

@@ -7,12 +7,18 @@ export class CreateDivisionDto {
   @IsNotEmpty()
   name: string;
 
-  @ApiPropertyOptional({ example: 'active', description: 'Status of the division' })
+  @ApiPropertyOptional({
+    example: 'active',
+    description: 'Status of the division',
+  })
   @IsOptional()
   @IsString()
   status?: string;
 
-  @ApiProperty({ example: 1, description: 'ID of the floor this division belongs to' })
+  @ApiProperty({
+    example: 1,
+    description: 'ID of the floor this division belongs to',
+  })
   @IsInt()
   @IsNotEmpty()
   floorId: number;
