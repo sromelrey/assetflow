@@ -13,24 +13,24 @@ const baseQuery = fetchBaseQuery({
   },
 });
 
-const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
-  args,
-  api,
-  extraOptions
-) => {
-  let result = await baseQuery(args, api, extraOptions);
+const baseQueryWithReauth: BaseQueryFn<
+  string | FetchArgs,
+  unknown,
+  FetchBaseQueryError
+> = async (args, api, extraOptions) => {
+  const result = await baseQuery(args, api, extraOptions);
 
   if (result.error && result.error.status === 401) {
     // Clear the redux state
     api.dispatch(logOut());
-    
+
     // Clear cookies explicitly so NextJS middleware drops the authentication layout mapping
-    Cookies.remove('accessToken');
-    Cookies.remove('user_role');
-    
+    Cookies.remove("accessToken");
+    Cookies.remove("user_role");
+
     // Hard navigate if we're operating within the browser layer
-    if (typeof window !== 'undefined') {
-      window.location.href = '/login';
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
     }
   }
 
@@ -38,8 +38,22 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 };
 
 export const apiSlice = createApi({
-  reducerPath: 'api',
+  reducerPath: "api",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['User', 'Site', 'Building', 'Floor', 'Category', 'Division', 'Department', 'Unit', 'Asset', 'Employee', 'Inventory', 'Report'],
+  tagTypes: [
+    "User",
+    "Site",
+    "Building",
+    "Floor",
+    "Category",
+    "Division",
+    "Department",
+    "Unit",
+    "Asset",
+    "Employee",
+    "Inventory",
+    "Report",
+    "InventoryHistory",
+  ],
   endpoints: (builder) => ({}),
 });

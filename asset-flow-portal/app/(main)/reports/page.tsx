@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -128,7 +129,7 @@ export default function ReportsPage() {
       const { jsPDF } = (window as any).jspdf;
       const doc = new jsPDF("p", "mm", "a4");
 
-      const sortedSites = Object.values(reportData.data).sort(
+      const sortedSites = Object.values(reportData.data as any[]).sort(
         (a: any, b: any) => a.siteName.localeCompare(b.siteName),
       );
       const currentDate = new Date().toLocaleDateString("en-US", {
@@ -602,7 +603,7 @@ export default function ReportsPage() {
 
         const detailRows: Array<[string, string, string, string, string]> = [];
         for (const site of sortedSites) {
-          const categories = Object.values(site.categories).sort(
+          const categories = Object.values(site.categories as any[]).sort(
             (a: any, b: any) => a.categoryName.localeCompare(b.categoryName),
           );
           for (const category of categories) {
@@ -733,34 +734,35 @@ export default function ReportsPage() {
                 </tr>
               </thead>
               <tbody>
-                {Object.values(reportData.data).map((site: SiteData) =>
-                  Object.values(site.categories).map((category, idx) => (
-                    <tr
-                      key={`${site.siteId}-${category.categoryId}`}
-                      className={idx === 0 ? "bg-blue-50" : ""}
-                    >
-                      {idx === 0 && (
-                        <td
-                          className='border border-gray-300 px-4 py-2 font-medium'
-                          rowSpan={Object.keys(site.categories).length}
-                        >
-                          {site.siteName}
+                {(Object.values(reportData.data) as SiteData[]).map(
+                  (site: SiteData) =>
+                    Object.values(site.categories).map((category, idx) => (
+                      <tr
+                        key={`${site.siteId}-${category.categoryId}`}
+                        className={idx === 0 ? "bg-blue-50" : ""}
+                      >
+                        {idx === 0 && (
+                          <td
+                            className='border border-gray-300 px-4 py-2 font-medium'
+                            rowSpan={Object.keys(site.categories).length}
+                          >
+                            {site.siteName}
+                          </td>
+                        )}
+                        <td className='border border-gray-300 px-4 py-2'>
+                          {category.categoryName}
                         </td>
-                      )}
-                      <td className='border border-gray-300 px-4 py-2'>
-                        {category.categoryName}
-                      </td>
-                      <td className='border border-gray-300 px-4 py-2 text-center'>
-                        {category.total}
-                      </td>
-                      <td className='border border-gray-300 px-4 py-2 text-center'>
-                        {category.deployed}
-                      </td>
-                      <td className='border border-gray-300 px-4 py-2 text-center'>
-                        {category.onHand}
-                      </td>
-                    </tr>
-                  )),
+                        <td className='border border-gray-300 px-4 py-2 text-center'>
+                          {category.total}
+                        </td>
+                        <td className='border border-gray-300 px-4 py-2 text-center'>
+                          {category.deployed}
+                        </td>
+                        <td className='border border-gray-300 px-4 py-2 text-center'>
+                          {category.onHand}
+                        </td>
+                      </tr>
+                    )),
                 )}
               </tbody>
             </table>
