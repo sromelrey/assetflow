@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { AssetDetailsCard } from '@/components/AssetDetailsCard';
-import { Search, X, ChevronsUpDown, ChevronUp, ChevronDown, SlidersHorizontal, Filter } from 'lucide-react';
+import { Search, X, ChevronsUpDown, ChevronUp, ChevronDown, SlidersHorizontal, Filter, FileText, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -25,8 +25,11 @@ import { useGetCategoriesQuery } from '@/store/api/categoriesApi';
 import { useGetSitesQuery, useGetBuildingsQuery, useGetFloorsQuery } from '@/store/api/locationsApi';
 import { useGetDivisionsQuery, useGetDepartmentsQuery } from '@/store/api/organizationApi';
 import { AddAssetModal } from './AddAssetModal';
+import { QrView } from './components/QrView';
+import { StickerSize } from './components/QrSticker';
 
 const LIMIT = 20;
+const QR_BATCH_LIMIT = 200;
 
 const ASSET_STATUSES: AssetStatus[] = [
   'Active', 'Deployed', 'Decommissioned', 'For Repair', 'For Deployment', 'In Storage',
@@ -66,6 +69,18 @@ const NONE = '__all__';
 
 export default function AssetsPage() {
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
+
+  // View mode
+  const [viewMode, setViewMode] = useState<'detailed' | 'qr'>('detailed');
+
+  // Shared selection state
+  const [selectedAssetIds, setSelectedAssetIds] = useState<Set<number>>(new Set());
+
+  // Sticker size for QR view
+  const [stickerSize, setStickerSize] = useState<StickerSize>('medium');
+
+  // PDF generation loading state
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   // Basic filters
   const [search, setSearch]               = useState('');
@@ -121,6 +136,33 @@ export default function AssetsPage() {
     setDepartmentId(undefined);
   };
 
+  // Selection handlers
+  const toggleAssetSelection = (id: number) => {
+    setSelectedAssetIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = (assets: Asset[]) => {
+    setSelectedAssetIds((prev) => {
+      const next = new Set(prev);
+      const allVisibleSelected = assets.every((a) => next.has(a.id));
+      if (allVisibleSelected) {
+        assets.forEach((a) => next.delete(a.id));
+      } else {
+        assets.forEach((a) => next.add(a.id));
+      }
+      return next;
+    });
+  };
+
+  const clearSelection = () => {
+    setSelectedAssetIds(new Set());
+  };
+
   // Hierarchy data (cascading)
   const { data: sites      = [] } = useGetSitesQuery();
   const { data: buildings  = [] } = useGetBuildingsQuery(siteId ? { siteId } : undefined);
@@ -148,19 +190,38 @@ export default function AssetsPage() {
     setHasMore(true);
   }, [debouncedSearch, statusFilter, categoryId, siteId, buildingId, floorId, divisionId, departmentId]);
 
-  // Build query params (only defined values)
-  const queryParams: Record<string, unknown> = { limit: LIMIT };
-  if (cursor !== undefined)      queryParams.cursor       = cursor;
-  if (debouncedSearch)           queryParams.search       = debouncedSearch;
-  if (statusFilter)              queryParams.status       = statusFilter;
-  if (categoryId !== undefined)  queryParams.categoryId   = categoryId;
-  if (siteId !== undefined)      queryParams.siteId       = siteId;
-  if (buildingId !== undefined)  queryParams.buildingId   = buildingId;
-  if (floorId !== undefined)     queryParams.floorId      = floorId;
-  if (divisionId !== undefined)  queryParams.divisionId   = divisionId;
-  if (departmentId !== undefined) queryParams.departmentId = departmentId;
+  // Build query params for detailed view (infinite scroll)
+  const detailedQueryParams: Record<string, unknown> = { limit: LIMIT };
+  if (cursor !== undefined)      detailedQueryParams.cursor       = cursor;
+  if (debouncedSearch)           detailedQueryParams.search       = debouncedSearch;
+  if (statusFilter)              detailedQueryParams.status       = statusFilter;
+  if (categoryId !== undefined)  detailedQueryParams.categoryId   = categoryId;
+  if (siteId !== undefined)      detailedQueryParams.siteId       = siteId;
+  if (buildingId !== undefined)  detailedQueryParams.buildingId   = buildingId;
+  if (floorId !== undefined)     detailedQueryParams.floorId      = floorId;
+  if (divisionId !== undefined)  detailedQueryParams.divisionId   = divisionId;
+  if (departmentId !== undefined) detailedQueryParams.departmentId = departmentId;
 
-  const { data: pageData, isFetching, isError } = useGetAssetsQuery(queryParams as any);
+  // Build query params for QR view (load all filtered)
+  const qrQueryParams: Record<string, unknown> = { limit: QR_BATCH_LIMIT };
+  if (debouncedSearch)           qrQueryParams.search       = debouncedSearch;
+  if (statusFilter)              qrQueryParams.status       = statusFilter;
+  if (categoryId !== undefined)  qrQueryParams.categoryId   = categoryId;
+  if (siteId !== undefined)      qrQueryParams.siteId       = siteId;
+  if (buildingId !== undefined)  qrQueryParams.buildingId   = buildingId;
+  if (floorId !== undefined)     qrQueryParams.floorId      = floorId;
+  if (divisionId !== undefined)  qrQueryParams.divisionId   = divisionId;
+  if (departmentId !== undefined) qrQueryParams.departmentId = departmentId;
+
+  // Detailed view query (infinite scroll)
+  const { data: pageData, isFetching, isError } = useGetAssetsQuery(
+    viewMode === 'detailed' ? detailedQueryParams as any : { limit: 0 }
+  );
+
+  // QR view query (load all filtered)
+  const { data: qrAssets = [], isLoading: isLoadingQrAssets } = useGetAssetsQuery(
+    viewMode === 'qr' ? qrQueryParams as any : { limit: 0 }
+  );
 
   useEffect(() => {
     if (!pageData) return;
@@ -201,6 +262,275 @@ export default function AssetsPage() {
     setDivisionId(undefined); setDepartmentId(undefined);
   };
 
+  // Load libraries for PDF generation
+  const loadLibraries = async () => {
+    // Load jsPDF
+    if (!(window as any).jspdf) {
+      await new Promise<void>((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        script.onload = () => setTimeout(resolve, 100);
+        script.onerror = () => reject(new Error('Failed to load jsPDF'));
+        document.head.appendChild(script);
+      });
+    }
+
+    // Load QRCode.js
+    if (!(window as any).QRCode) {
+      await new Promise<void>((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+        script.onload = () => setTimeout(resolve, 100);
+        script.onerror = () => reject(new Error('Failed to load QRCode'));
+        document.head.appendChild(script);
+      });
+    }
+  };
+
+  // Generate QR PDF content
+const generateQrPdfContent = async () => {
+  const { jsPDF } = (window as any).jspdf;
+  const QRCode = (window as any).QRCode;
+
+  if (!jsPDF) throw new Error('jsPDF not loaded');
+  if (!QRCode) throw new Error('QRCode not loaded');
+
+  const doc = new jsPDF('p', 'mm', 'a4');
+
+  const selectedAssets = qrAssets.filter((a) =>
+    selectedAssetIds.has(a.id)
+  );
+
+  if (selectedAssets.length === 0) {
+    throw new Error('No assets selected');
+  }
+
+  const APP_BASE_URL =
+    process.env.NEXT_PUBLIC_APP_URL || '';
+
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+
+  // Match QrSticker.tsx
+  const PDF_STICKER_SIZES = {
+    small: {
+      width: 50,
+      height: 25,
+      qr: 18,
+      titleFont: 6,
+      bodyFont: 4,
+    },
+  medium: {
+  width: 60,
+  height: 30,
+  qr: 22,
+  titleFont: 7,
+  bodyFont: 5,
+},
+    large: {
+      width: 76.2,
+      height: 50.8,
+      qr: 30,
+      titleFont: 8,
+      bodyFont: 6,
+    },
+  };
+
+  const layout = PDF_STICKER_SIZES[stickerSize];
+
+  const stickerWidth = layout.width;
+  const stickerHeight = layout.height;
+  const qrSize = layout.qr;
+
+  const margin = 8;
+  const gap = 2;
+
+  const usableWidth = pageWidth - margin * 2;
+
+  const cols = Math.max(
+    1,
+    Math.floor(
+      (usableWidth + gap) /
+      (stickerWidth + gap)
+    )
+  );
+
+  let x = margin;
+  let y = margin;
+  let col = 0;
+
+  for (const asset of selectedAssets) {
+    try {
+      const qrUrl = `${APP_BASE_URL}/assets/${asset.id}`;
+
+      const tempDiv = document.createElement('div');
+      tempDiv.style.display = 'none';
+
+      document.body.appendChild(tempDiv);
+
+      new QRCode(tempDiv, {
+        text: qrUrl,
+        width: 128,
+        height: 128,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M,
+      });
+
+      await new Promise((resolve) =>
+        setTimeout(resolve, 50)
+      );
+
+      const canvas =
+        tempDiv.querySelector(
+          'canvas'
+        ) as HTMLCanvasElement;
+
+      const qrDataUrl = canvas
+        ? canvas.toDataURL('image/png')
+        : '';
+
+      document.body.removeChild(tempDiv);
+
+      // Border
+      doc.setDrawColor(120, 120, 120);
+      doc.setLineWidth(0.25);
+
+      doc.rect(
+        x,
+        y,
+        stickerWidth,
+        stickerHeight
+      );
+
+      // QR Image
+      if (qrDataUrl) {
+const qrY =
+  y + (stickerHeight - qrSize) / 2;
+
+doc.addImage(
+  qrDataUrl,
+  'PNG',
+  x + 2,
+  qrY,
+  qrSize,
+  qrSize
+);
+      }
+
+const textX = x + qrSize + 6;
+
+      const centerY =
+        y + stickerHeight / 2;
+
+      // Asset Name
+      doc.setFont(
+        'helvetica',
+        'bold'
+      );
+
+      doc.setFontSize(
+        layout.titleFont
+      );
+
+      const assetName =
+        asset.name?.length > 18
+          ? asset.name.substring(0, 18) + '...'
+          : asset.name || 'Unknown';
+
+      doc.text(
+        assetName,
+        textX,
+        centerY - 6
+      );
+
+      // Asset No
+      doc.setFont(
+        'helvetica',
+        'normal'
+      );
+
+      doc.setFontSize(
+        layout.bodyFont
+      );
+
+      doc.text(
+        asset.assetNo
+          ? `#${asset.assetNo}`
+          : 'N/A',
+        textX,
+        centerY - 1
+      );
+
+      // Category
+      doc.text(
+        asset.category?.name ||
+          'Uncategorized',
+        textX,
+        centerY + 4
+      );
+
+      // Location
+      doc.text(
+        asset.unit?.name || 'N/A',
+        textX,
+        centerY + 9
+      );
+
+      col++;
+
+      if (col >= cols) {
+        col = 0;
+        x = margin;
+        y += stickerHeight + gap;
+
+        if (
+          y + stickerHeight >
+          pageHeight - margin
+        ) {
+          doc.addPage();
+          y = margin;
+        }
+      } else {
+        x += stickerWidth + gap;
+      }
+    } catch (error) {
+      console.error(
+        `QR generation failed for asset ${asset.id}`,
+        error
+      );
+    }
+  }
+
+  doc.save(
+    `QR-Codes-${
+      new Date()
+        .toISOString()
+        .split('T')[0]
+    }.pdf`
+  );
+};
+  // PDF generation for QR codes
+  const generateQrPdf = async () => {
+    if (selectedAssetIds.size === 0) {
+      alert('Please select at least one asset');
+      return;
+    }
+
+    setIsGeneratingPdf(true);
+    try {
+      await loadLibraries();
+      await generateQrPdfContent();
+      // Optional: Show success message
+      console.log('PDF generated successfully');
+    } catch (error) {
+      console.error('PDF generation failed:', error);
+      alert(`Failed to generate PDF: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
   const hierarchyFilterCount = [siteId, buildingId, floorId, divisionId, departmentId].filter(Boolean).length;
   const hasActiveFilters = !!(debouncedSearch || statusFilter || categoryId !== undefined || hierarchyFilterCount);
 
@@ -212,7 +542,29 @@ export default function AssetsPage() {
           <h1 className="text-3xl font-bold text-foreground">Assets</h1>
           <p className="text-muted-foreground mt-1">Manage and track all your organization&apos;s assets</p>
         </div>
-        <AddAssetModal />
+        <div className="flex items-center gap-3">
+          {/* View Switcher */}
+          <Select value={viewMode} onValueChange={(v) => setViewMode(v as 'detailed' | 'qr')}>
+            <SelectTrigger className="w-[150px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="detailed">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  Detailed View
+                </div>
+              </SelectItem>
+              <SelectItem value="qr">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  QR View
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          <AddAssetModal />
+        </div>
       </div>
 
       {/* Primary Filter Bar */}
@@ -283,7 +635,9 @@ export default function AssetsPage() {
           </Button>
         )}
 
-        <span className="text-sm text-muted-foreground ml-auto">{allAssets.length} assets loaded</span>
+        <span className="text-sm text-muted-foreground ml-auto">
+          {viewMode === 'detailed' ? `${allAssets.length} assets loaded` : `${qrAssets.length} assets available`}
+        </span>
       </div>
 
       {/* Hierarchy Filter Panel */}
@@ -349,78 +703,95 @@ export default function AssetsPage() {
         </div>
       )}
 
-      {/* Split View */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6">
-        {/* Table */}
-        <div className="bg-card rounded-lg shadow-sm border overflow-hidden">
-          {isError && (
-            <div className="p-4 text-sm text-destructive bg-destructive/10 border-b">
-              Failed to load assets — check that the API server is running.
-            </div>
-          )}
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="border-b bg-muted/30">
-                <tr>
-                  {activeCols.map((col) => (
-                    <th
-                      key={col.key}
-                      onClick={() => handleSort(col.key)}
-                      className="px-4 py-3 text-left font-medium text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors whitespace-nowrap"
+      {/* Split View - Only in detailed mode */}
+      {viewMode === 'detailed' ? (
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6">
+          {/* Table */}
+          <div className="bg-card rounded-lg shadow-sm border overflow-hidden">
+            {isError && (
+              <div className="p-4 text-sm text-destructive bg-destructive/10 border-b">
+                Failed to load assets — check that the API server is running.
+              </div>
+            )}
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="border-b bg-muted/30">
+                  <tr>
+                    {activeCols.map((col) => (
+                      <th
+                        key={col.key}
+                        onClick={() => handleSort(col.key)}
+                        className="px-4 py-3 text-left font-medium text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors whitespace-nowrap"
+                      >
+                        {col.label}<SortIcon col={col.key} />
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedAssets.map((asset) => (
+                    <tr
+                      key={asset.id}
+                      onClick={() => setSelectedAsset(asset)}
+                      className={`border-b cursor-pointer transition-colors hover:bg-muted/50 ${selectedAsset?.id === asset.id ? 'bg-muted' : ''}`}
                     >
-                      {col.label}<SortIcon col={col.key} />
-                    </th>
+                      {activeCols.map((col) => (
+                        <td key={col.key} className="px-4 py-3">
+                          {col.key === 'status' ? (
+                            <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${STATUS_COLORS[asset.status] ?? 'bg-gray-100 text-gray-700'}`}>
+                              {asset.status}
+                            </span>
+                          ) : (
+                            <span className={col.getValue(asset) === '—' ? 'text-muted-foreground' : ''}>
+                              {col.getValue(asset)}
+                            </span>
+                          )}
+                        </td>
+                      ))}
+                    </tr>
                   ))}
-                </tr>
-              </thead>
-              <tbody>
-                {sortedAssets.map((asset) => (
-                  <tr
-                    key={asset.id}
-                    onClick={() => setSelectedAsset(asset)}
-                    className={`border-b cursor-pointer transition-colors hover:bg-muted/50 ${selectedAsset?.id === asset.id ? 'bg-muted' : ''}`}
-                  >
-                    {activeCols.map((col) => (
-                      <td key={col.key} className="px-4 py-3">
-                        {col.key === 'status' ? (
-                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${STATUS_COLORS[asset.status] ?? 'bg-gray-100 text-gray-700'}`}>
-                            {asset.status}
-                          </span>
-                        ) : (
-                          <span className={col.getValue(asset) === '—' ? 'text-muted-foreground' : ''}>
-                            {col.getValue(asset)}
-                          </span>
-                        )}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
 
-                {isFetching && Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={`skeleton-${i}`} className="border-b animate-pulse">
-                    {activeCols.map((col) => (
-                      <td key={col.key} className="px-4 py-3"><div className="h-4 bg-muted rounded w-3/4" /></td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                  {isFetching && Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={`skeleton-${i}`} className="border-b animate-pulse">
+                      {activeCols.map((col) => (
+                        <td key={col.key} className="px-4 py-3"><div className="h-4 bg-muted rounded w-3/4" /></td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div ref={sentinelRef} className="h-4" />
+
+            {!hasMore && !isFetching && (
+              <p className="text-center text-sm text-muted-foreground py-4">
+                {allAssets.length === 0 ? 'No assets match your filters.' : 'All assets loaded.'}
+              </p>
+            )}
           </div>
 
-          <div ref={sentinelRef} className="h-4" />
-
-          {!hasMore && !isFetching && (
-            <p className="text-center text-sm text-muted-foreground py-4">
-              {allAssets.length === 0 ? 'No assets match your filters.' : 'All assets loaded.'}
-            </p>
-          )}
+          {/* Detail Card - Will be removed after implementation */}
+          <div className="lg:sticky lg:top-8 lg:self-start">
+            <AssetDetailsCard asset={selectedAsset as any} onClose={() => setSelectedAsset(null)} />
+          </div>
         </div>
-
-        {/* Detail Card */}
-        <div className="lg:sticky lg:top-8 lg:self-start">
-          <AssetDetailsCard asset={selectedAsset as any} onClose={() => setSelectedAsset(null)} />
-        </div>
-      </div>
+      ) : (
+        /* QR View */
+        <QrView
+          assets={qrAssets}
+          isLoading={isLoadingQrAssets}
+          selectedIds={selectedAssetIds}
+          onToggleSelection={toggleAssetSelection}
+          onToggleSelectAll={() => toggleSelectAll(qrAssets)}
+          onClearSelection={clearSelection}
+          stickerSize={stickerSize}
+          onStickerSizeChange={setStickerSize}
+          onGeneratePdf={generateQrPdf}
+          onClearFilters={clearFilters}
+          isGeneratingPdf={isGeneratingPdf}
+        />
+      )}
     </div>
   );
 }

@@ -14,6 +14,8 @@ import { SiteModule } from './modules/site/site.module';
 import { UnitModule } from './modules/unit/unit.module';
 import { UserModule } from './modules/user/user.module';
 import { InventoryModule } from './modules/inventory/inventory.module';
+import { ReportModule } from './modules/report/report.module';
+
 @Module({
   imports: [
     // Global config module
@@ -44,6 +46,7 @@ import { InventoryModule } from './modules/inventory/inventory.module';
     HealthModule,
     SiteModule,
     UnitModule,
+    ReportModule,
     UserModule,
     InventoryModule,
   ],

@@ -21,6 +21,7 @@ import {
   History,
   QrCode,
   Warehouse,
+  FileText,
 } from 'lucide-react';
 
 interface NavItem {
@@ -45,6 +46,11 @@ const navItems: NavItem[] = [
     title: 'Inventory',
     href: '/inventory',
     icon: Warehouse,
+  },
+  {
+    title: 'Reports',
+    href: '/reports',
+    icon: FileText,
   },
   {
     title: 'Status History',
