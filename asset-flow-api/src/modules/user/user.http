@@ -1,0 +1,31 @@
+### Create User
+# @name createUser
+POST {{API_BASE_URL}}/user
+Content-Type: application/json
+
+{
+  "name": "Test User",
+  "email": "test.user@example.com",
+  "password": "password123",
+  "firstName": "Test",
+  "lastName": "User",
+  "isActive": true
+}
+
+### Find All Users
+GET {{API_BASE_URL}}/user
+
+### Find One User
+@userId = {{createUser.id}}
+GET {{API_BASE_URL}}/user/{{userId}}
+
+### Update User
+PATCH {{API_BASE_URL}}/user/{{userId}}
+Content-Type: application/json
+
+{
+  "name": "Updated User Name"
+}
+
+### Remove User
+DELETE {{API_BASE_URL}}/user/{{userId}}

@@ -1,0 +1,43 @@
+### Admin Login (establish session cookie)
+# @name adminLogin
+POST {{API_BASE_URL}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{TEST_USERNAME}}",
+  "password": "{{TEST_USER_PASSWORD}}"
+}
+
+
+### Capture Token
+@authToken = {{adminLogin.accessToken}}
+
+
+### Create Department
+# @name createDepartment
+POST {{API_BASE_URL}}/department
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "CLINICAL PRACTICES",
+  "divisionId": 1
+}
+
+### Find All Departments
+GET {{API_BASE_URL}}/department
+
+### Find One Department
+@departmentId = {{createDepartment.id}}
+GET {{API_BASE_URL}}/department/{{departmentId}}
+
+### Update Department
+PATCH {{API_BASE_URL}}/department/{{departmentId}}
+Content-Type: application/json
+
+{
+  "name": "Updated Department Name"
+}
+
+### Remove Department
+DELETE {{API_BASE_URL}}/department/{{departmentId}}

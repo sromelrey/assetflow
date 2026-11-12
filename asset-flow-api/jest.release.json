@@ -1,0 +1,8 @@
+{
+  "rootDir": ".",
+  "testEnvironment": "node",
+  "testMatch": ["<rootDir>/src/**/*.release.spec.ts"],
+  "transform": { "^.+\\.tsx?$": ["ts-jest", { "tsconfig": "tsconfig.json" }] },
+  "moduleNameMapper": { "^@/(.*)$": "<rootDir>/src/$1" },
+  "testTimeout": 60000
+}

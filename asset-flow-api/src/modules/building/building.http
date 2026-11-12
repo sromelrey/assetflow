@@ -1,0 +1,42 @@
+### Admin Login (establish session cookie)
+# @name adminLogin
+POST {{API_BASE_URL}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{TEST_USERNAME}}",
+  "password": "{{TEST_USER_PASSWORD}}"
+}
+
+### Capture Token
+@authToken = {{adminLogin.accessToken}}
+
+### Create Building
+# @name createBuilding
+POST {{API_BASE_URL}}/building
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "Building A",
+  "siteId": 1
+}
+
+### Find All Buildings
+GET {{API_BASE_URL}}/building
+Authorization: Bearer {{authToken}}
+
+### Find One Building
+@buildingId = {{createBuilding.id}}
+GET {{API_BASE_URL}}/building/{{buildingId}}
+
+### Update Building
+PATCH {{API_BASE_URL}}/building/{{buildingId}}
+Content-Type: application/json
+
+{
+  "name": "Updated Building Name"
+}
+
+### Remove Building
+DELETE {{API_BASE_URL}}/building/{{buildingId}}

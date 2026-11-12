@@ -1,0 +1,42 @@
+### Admin Login (establish session cookie)
+# @name adminLogin
+POST {{API_BASE_URL}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{TEST_USERNAME}}",
+  "password": "{{TEST_USER_PASSWORD}}"
+}
+
+
+### Capture Token
+@authToken = {{adminLogin.accessToken}}
+
+
+### Create Category
+# @name createCategory
+POST {{API_BASE_URL}}/category
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "MONITOR"
+}
+
+### Find All Categories
+GET {{API_BASE_URL}}/category
+
+### Find One Category
+@categoryId = {{createCategory.id}}
+GET {{API_BASE_URL}}/category/{{categoryId}}
+
+### Update Category
+PATCH {{API_BASE_URL}}/category/{{categoryId}}
+Content-Type: application/json
+
+{
+  "name": "Updated Category Name"
+}
+
+### Remove Category
+DELETE {{API_BASE_URL}}/category/{{categoryId}}
